@@ -40,3 +40,13 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
+
+.tooltip {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-overlay);
+  color: var(--text);
+  font-size: 13px;
+}
