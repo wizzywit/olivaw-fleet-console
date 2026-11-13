@@ -22,6 +22,8 @@ export {
   siteDtoSchema,
   fleetConfigDtoSchema,
   fleetSnapshotDtoSchema,
+  seenMarkRequestSchema,
+  type SeenMarkRequest,
   type StatusCounts,
   type FleetAggregatesDto,
   type AttentionGroupDto,

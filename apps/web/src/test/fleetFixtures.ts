@@ -60,6 +60,7 @@ export function aSnapshotDto(overrides: Partial<FleetSnapshotDto> = {}): FleetSn
           reason: 'battery-critical',
           priority: 'high',
           count: 1,
+          unseenCount: 1,
           worstRobotId: 'DLV-0087',
           robotIds: ['DLV-0087'],
         },
