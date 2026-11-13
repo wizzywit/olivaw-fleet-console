@@ -33,4 +33,4 @@ Practices:
 ## Consequences
 
 - 305 tests across the workspace run in seconds.
-- Playwright end-to-end checks with axe in both themes are planned for tier 3; until then the browser was checked by hand (README).
+- Playwright end-to-end tests (`apps/e2e`, `pnpm test:e2e`, a separate CI job) run against the real system: ingest, a 300-robot simulator and a production build. They cover the live overview, opening a robot from the keyboard, losing and regaining the live connection (`page.routeWebSocket`), and axe checks against WCAG 2.2 A/AA on the overview, grid, palette and robot detail in light and dark. Local runs use the installed Chrome; CI installs Playwright's Chromium.
