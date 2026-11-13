@@ -166,7 +166,8 @@ export default tseslint.config(
           paths: [
             {
               name: '@olivaw/contracts',
-              message: 'Use the domain types and services exported by the entities; contracts belong in adapters.',
+              message:
+                'Use the domain types and services exported by the entities; contracts belong in adapters.',
             },
           ],
         },

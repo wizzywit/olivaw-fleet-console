@@ -50,7 +50,11 @@ describe('live messages', () => {
     expect(
       liveClientMessageSchema.parse({ type: 'hello', lastSequence: 3, instanceId: 'a' }).instanceId,
     ).toBe('a');
-    expect(liveClientMessageSchema.parse({ type: 'hello', lastSequence: null, instanceId: null }).lastSequence).toBeNull();
-    expect(liveClientMessageSchema.parse({ type: 'hello', lastSequence: 12, instanceId: 'x' }).lastSequence).toBe(12);
+    expect(
+      liveClientMessageSchema.parse({ type: 'hello', lastSequence: null, instanceId: null }).lastSequence,
+    ).toBeNull();
+    expect(
+      liveClientMessageSchema.parse({ type: 'hello', lastSequence: 12, instanceId: 'x' }).lastSequence,
+    ).toBe(12);
   });
 });
