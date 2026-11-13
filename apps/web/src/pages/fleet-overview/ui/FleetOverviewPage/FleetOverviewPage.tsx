@@ -6,7 +6,7 @@ import { AppHeader } from '@/widgets/app-header';
 import { LiveConnectionBanner } from '@/widgets/live-connection-banner';
 import { Button, EmptyState, SegmentedControl, Skeleton } from '@/shared/ui';
 import { useFleetOverview } from '../../use-cases/useFleetOverview';
-import { useViewMode } from '../../use-cases/useViewMode';
+import { useViewMode } from '@/features/switch-fleet-view';
 import { AttentionList } from '../AttentionList/AttentionList';
 import { RobotGrid } from '../RobotGrid/RobotGrid';
 import { RobotTable } from '../RobotTable/RobotTable';
