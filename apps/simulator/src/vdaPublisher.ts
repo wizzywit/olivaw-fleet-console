@@ -55,6 +55,10 @@ export async function runVdaFleet(robots: SimRobot[], options: VdaFleetOptions) 
       client.on('error', (error) => {
         log(`${robot.serialNumber}: ${error.message}`);
       });
+      // Any lost connection (broker restart, network) sends the robot back through connect() on the next tick.
+      client.on('close', () => {
+        if (connection.client === client) connection.client = null;
+      });
       const now = new Date();
       await client.publishAsync(
         topic('connection'),
