@@ -1,5 +1,6 @@
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { ThemeBootstrapScript } from '@/features/toggle-theme';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import { Providers } from './Providers';
@@ -15,6 +16,9 @@ export function RootLayout({ children }: { children: ReactNode }) {
       className={`${inter.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <ThemeBootstrapScript />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>
