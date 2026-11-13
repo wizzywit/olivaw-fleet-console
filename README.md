@@ -105,7 +105,7 @@ Table: Before and after the fixes in ADR 0018 and the grid redraw change.
 | Table, idle: frames over 33 ms in 10 s  | 10 (about 65 ms each)  | 0 (worst 15 ms)      |
 | Grid, idle: frames over 33 ms in 10 s   | 10 (about 100 ms each) | 1 to 5 (worst 56 ms) |
 | Grid, arrow keys: key events over 16 ms | 63 of 70 (worst 64 ms) | 1 of 70 (40 ms)      |
-| Typing in search and in the palette     | worst 32 ms            | not re-measured      |
+| Typing in the search field              | worst 32 ms            | none over 16 ms      |
 
 What the profile found and what changed:
 
