@@ -15,12 +15,8 @@ export function createAcknowledgements() {
       acknowledged.set(reason, new Set([...current, ...added]));
       return true;
     },
-    keepOnly(reason: AttentionReason, memberIds: readonly string[]): void {
-      const members = new Set(memberIds);
-      acknowledged.set(
-        reason,
-        new Set([...acknowledgedFor(reason)].filter((robotId) => members.has(robotId))),
-      );
+    forget(reason: AttentionReason, robotId: string): void {
+      acknowledged.get(reason)?.delete(robotId);
     },
     unacknowledgedIn(reason: AttentionReason, memberIds: readonly string[]): number {
       const current = acknowledgedFor(reason);

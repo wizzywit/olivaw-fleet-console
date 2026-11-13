@@ -24,7 +24,7 @@ describe('acknowledgements', () => {
   it('forgets members that left, so a robot that comes back is unacknowledged again', () => {
     const acknowledgements = createAcknowledgements();
     acknowledgements.acknowledge('stuck', ['A', 'B']);
-    acknowledgements.keepOnly('stuck', ['A']);
+    acknowledgements.forget('stuck', 'B');
     expect(acknowledgements.unacknowledgedIn('stuck', ['A', 'B'])).toBe(1);
   });
 

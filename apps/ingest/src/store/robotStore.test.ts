@@ -169,6 +169,20 @@ describe('robot store', () => {
     expect(store.drainChanges().aggregatesChanged).toBe(false);
   });
 
+  it('forgets an acknowledgement when the robot leaves the group, even if it is back before the next patch', () => {
+    store.applyObservation(anObservation({ batteryPercent: 10 }), t(0));
+    store.acknowledge('battery-critical', ['DLV-0087']);
+    store.applyObservation(
+      anObservation({ batteryPercent: 10, charging: true, receivedAt: t(1000) }),
+      t(1000),
+    );
+    store.applyObservation(
+      anObservation({ batteryPercent: 10, charging: false, receivedAt: t(2000) }),
+      t(2000),
+    );
+    expect(store.aggregates().attentionGroups[0]?.unacknowledgedCount).toBe(1);
+  });
+
   it('includes aggregates in the snapshot', () => {
     store.applyObservation(anObservation(), t(0));
     expect(store.snapshot().aggregates.byStatus.working).toBe(1);

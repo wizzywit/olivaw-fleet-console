@@ -21,7 +21,6 @@ function groupAttention(acknowledgements: Acknowledgements, records: RobotRecord
     .map((reason) => {
       const members = records.filter((record) => isInAttentionGroup(record, reason));
       const memberIds = members.map((member) => member.robotId);
-      acknowledgements.keepOnly(reason, memberIds);
       return { reason, members, memberIds };
     })
     .flatMap(({ reason, members, memberIds }) => {

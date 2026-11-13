@@ -10,7 +10,7 @@ import {
 } from '@olivaw/contracts';
 import { siteIdForMap, zoneAt } from '@olivaw/demo-world';
 import { computeAggregates } from '../robot/aggregates';
-import { deriveAttentionReasons, isInAttentionGroup } from '../robot/attention';
+import { attentionReasonOrder, deriveAttentionReasons, isInAttentionGroup } from '../robot/attention';
 import { createAcknowledgements } from '../robot/acknowledgements';
 import { deriveStatus } from '../robot/status';
 import type { DomainConfig, RobotObservation, RobotRecord } from '../robot/types';
@@ -74,12 +74,17 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
   const acknowledgements = createAcknowledgements();
   let aggregatesChanged = false;
 
-  // Returns whether the derived state moved, so the sweep only queues robots whose status actually changed.
-  function recompute(record: RobotRecord, now: Date): boolean {
+  // Returns whether the derived state moved, so the sweep only queues robots whose status actually changed. A robot
+  // that leaves a group loses its acknowledgement there at once, so coming back before the next patch counts as new.
+  function recompute(record: RobotRecord, now: Date, previous: RobotRecord = record): boolean {
     const before = derivedState(record);
+    const memberOf = attentionReasonOrder.filter((reason) => isInAttentionGroup(previous, reason));
     record.attentionReasons = deriveAttentionReasons(record, now, config);
     record.status = deriveStatus(record, now, config);
     record.attentionSince = record.status === 'attention' ? (record.attentionSince ?? now) : null;
+    for (const reason of memberOf) {
+      if (!isInAttentionGroup(record, reason)) acknowledgements.forget(reason, record.robotId);
+    }
     return before !== derivedState(record);
   }
 
@@ -113,7 +118,7 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
         attentionReasons: [],
       };
       records.set(record.robotId, { record, siteId });
-      recompute(record, now);
+      recompute(record, now, previous);
       touched.add(record.robotId);
     },
 

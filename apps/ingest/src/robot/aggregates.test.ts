@@ -123,7 +123,7 @@ describe('computeAggregates', () => {
     ]);
   });
 
-  it('reports acknowledged members, and forgets robots that left every group', () => {
+  it('reports how many members nobody has acknowledged', () => {
     const acknowledgements = createAcknowledgements();
     const stuck = (robotId: string) => aRecord({ robotId, status: 'attention', attentionReasons: ['stuck'] });
     acknowledgements.acknowledge('stuck', ['A', 'B']);
@@ -131,9 +131,5 @@ describe('computeAggregates', () => {
       computeAggregates(acknowledgements, [stuck('A'), stuck('B'), stuck('C')]).attentionGroups[0]
         ?.unacknowledgedCount,
     ).toBe(1);
-    computeAggregates(acknowledgements, [stuck('C')]);
-    expect(
-      computeAggregates(acknowledgements, [stuck('A'), stuck('C')]).attentionGroups[0]?.unacknowledgedCount,
-    ).toBe(2);
   });
 });
