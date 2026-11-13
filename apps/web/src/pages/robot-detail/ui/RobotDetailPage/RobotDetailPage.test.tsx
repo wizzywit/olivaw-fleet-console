@@ -95,6 +95,25 @@ describe('robot detail', () => {
     expect(command).toEqual({ type: 'send-to-dock' });
   });
 
+  it('shows command feedback in a line that is always there, so the page does not jump', async () => {
+    server.use(
+      http.post('*/api/robots/DLV-0087/commands', () =>
+        HttpResponse.json({ accepted: true }, { status: 202 }),
+      ),
+    );
+    renderWithProviders(<RobotDetailPage robotId="DLV-0087" />);
+    const button = await screen.findByRole('button', { name: 'Send to dock' });
+    await waitFor(() => {
+      expect(button).toBeEnabled();
+    });
+    const feedback = screen.getByTestId('command-feedback');
+    expect(feedback).toBeEmptyDOMElement();
+    await userEvent.click(button);
+    await waitFor(() => {
+      expect(feedback).toHaveTextContent('Sent to dock');
+    });
+  });
+
   it('disables commands while the live connection is down', async () => {
     let connections = 0;
     server.use(

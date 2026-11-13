@@ -93,19 +93,14 @@ export function RobotDetailPage({ robotId }: { robotId: string }) {
                 </Button>
               </div>
             </div>
-            {detail.commands.disabledReason !== null && (
-              <p className={styles.note}>{detail.commands.disabledReason}</p>
-            )}
-            {detail.commands.sentLabel !== null && (
-              <p role="status" className={styles.note}>
-                {detail.commands.sentLabel}
-              </p>
-            )}
-            {detail.commands.failed && (
-              <p role="alert" className={styles.note}>
-                The command was not accepted. Try again.
-              </p>
-            )}
+            {/* Always rendered with a reserved line, so feedback never pushes the page down. */}
+            <p role="status" data-testid="command-feedback" className={styles.feedback}>
+              {detail.commands.feedback?.isError === true ? (
+                <span role="alert">{detail.commands.feedback.text}</span>
+              ) : (
+                detail.commands.feedback?.text
+              )}
+            </p>
             {detail.alert !== null && (
               <Banner tone="attention" role="alert" title={alertCopy[detail.alert.reason].title}>
                 {alertCopy[detail.alert.reason].body(detail.alert)}

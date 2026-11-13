@@ -44,6 +44,23 @@ export interface LocationMapView {
   description: string;
 }
 
+const sentLabels: Record<RobotCommandType, string> = {
+  'send-to-dock': 'Sent to dock',
+  pause: 'Pause requested',
+};
+
+// One message at a time for the reserved feedback line: a failure first, then what was sent, then why commands are off.
+function commandFeedback(
+  command: { failed: boolean; sent: RobotCommandType | null },
+  isConnected: boolean,
+): { text: string; isError: boolean } | null {
+  if (command.failed) return { text: 'The command was not accepted. Try again.', isError: true };
+  if (command.sent !== null) return { text: sentLabels[command.sent], isError: false };
+  if (!isConnected)
+    return { text: 'Commands are disabled until the live connection is back', isError: false };
+  return null;
+}
+
 export function useRobotDetail(robotId: string) {
   const robot = useFleetRobot(robotId);
   const sites = useFleetSites();
@@ -149,10 +166,7 @@ export function useRobotDetail(robotId: string) {
           },
     commands: {
       canSend,
-      disabledReason: isLive(live.status) ? null : 'Commands are disabled until the live connection is back',
-      sentLabel:
-        command.sent === null ? null : command.sent === 'send-to-dock' ? 'Sent to dock' : 'Pause requested',
-      failed: command.failed,
+      feedback: commandFeedback(command, isLive(live.status)),
       send: (type: RobotCommandType) => {
         command.send(type);
       },
