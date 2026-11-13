@@ -80,7 +80,7 @@ describe('command palette', () => {
 
   it('opens from the button in the search field and returns focus to the search on Escape', async () => {
     await renderLoaded();
-    const trigger = screen.getByRole('button', { name: 'Open command palette ⌘K' });
+    const trigger = screen.getByRole('button', { name: 'Open command palette Ctrl K' });
     await userEvent.click(trigger);
     await screen.findByRole('dialog', { name: 'Command palette' });
     await userEvent.keyboard('{Escape}');
