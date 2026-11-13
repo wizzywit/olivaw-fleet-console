@@ -22,6 +22,7 @@ const rowHeight = 52;
 export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldChange }: RobotTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasFocus, setHasFocus] = useState(false);
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
@@ -63,10 +64,13 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
           onHeldChange(false);
         }}
         onFocus={() => {
+          setHasFocus(true);
           onHeldChange(true);
         }}
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) onHeldChange(false);
+          if (event.currentTarget.contains(event.relatedTarget)) return;
+          setHasFocus(false);
+          onHeldChange(false);
         }}
       >
         <table className={styles.table} aria-rowcount={rows.length + 1}>
@@ -100,7 +104,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
                   key={row.id}
                   aria-rowindex={item.index + 2}
                   className={styles.row}
-                  data-active={item.index === active}
+                  data-active={hasFocus && item.index === active}
                   style={{ height: rowHeight }}
                 >
                   <th scope="row">
