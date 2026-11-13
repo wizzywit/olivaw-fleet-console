@@ -3,6 +3,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import Link from 'next/link';
 import { useRef, useState, type KeyboardEvent } from 'react';
+import type { ReactNode } from 'react';
 import { RobotStatusBadge } from '@/entities/robot';
 import { formatRelativeTime } from '@/shared/lib';
 import { BatteryMeter, KeyHint, VisuallyHidden } from '@/shared/ui';
@@ -16,6 +17,7 @@ export interface RobotTableProps {
   now: Date;
   onOpen: (href: string) => void;
   onHeldChange: (isHeld: boolean) => void;
+  notice?: ReactNode;
   describeRow: (row: RobotRowView, position: string) => string;
 }
 
@@ -28,10 +30,11 @@ export function RobotTable({
   onOpen,
   onHeldChange,
   describeRow,
+  notice,
 }: RobotTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const { hasFocus, holdProps } = useHoldWhileWorking(onHeldChange);
+  const { hasFocus, holdProps, focusProps } = useHoldWhileWorking(onHeldChange);
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
@@ -61,7 +64,7 @@ export function RobotTable({
   };
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} {...holdProps}>
       <div
         ref={scrollRef}
         className={styles.scroll}
@@ -70,7 +73,7 @@ export function RobotTable({
         aria-label="Robots, sorted by urgency"
         aria-describedby="robot-table-keys"
         onKeyDown={onKeyDown}
-        {...holdProps}
+        {...focusProps}
       >
         <table className={styles.table} aria-rowcount={rows.length + 1}>
           <caption>
@@ -143,6 +146,7 @@ export function RobotTable({
       <p id="robot-table-keys" className={styles.keys}>
         <KeyHint keys={['j', 'k']} /> move · <KeyHint keys={['Enter']} /> open
       </p>
+      {notice}
     </div>
   );
 }

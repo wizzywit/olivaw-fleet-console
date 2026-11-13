@@ -9,6 +9,7 @@ import {
   type MouseEvent,
   type RefObject,
 } from 'react';
+import type { ReactNode } from 'react';
 import { robotStatusLabel, type RobotStatus } from '@/entities/robot';
 import { KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
@@ -23,6 +24,7 @@ export interface RobotGridProps {
   sites: readonly { id: string; name: string }[];
   onOpen: (href: string) => void;
   onHeldChange: (isHeld: boolean) => void;
+  notice?: ReactNode;
 }
 
 const legend: RobotStatus[] = ['attention', 'offline', 'working', 'charging', 'idle'];
@@ -62,7 +64,7 @@ function useThemeVersion(): number {
   return version;
 }
 
-export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps) {
+export function RobotGrid({ rows, sites, onOpen, onHeldChange, notice }: RobotGridProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -72,7 +74,7 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps)
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [lastIndex, setLastIndex] = useState(0);
   const [hovered, setHovered] = useState<{ index: number; placement: TooltipPlacement } | null>(null);
-  const { hasFocus, holdProps } = useHoldWhileWorking(onHeldChange, () => {
+  const { hasFocus, holdProps, focusProps } = useHoldWhileWorking(onHeldChange, () => {
     setHovered(null);
   });
   const focusIndex = grid.follow(focusedId, lastIndex);
@@ -127,7 +129,7 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps)
   const hoveredRow = hovered === null ? undefined : grid.rowAt(hovered.index);
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} {...holdProps}>
       <div
         ref={scrollRef}
         className={styles.scroll}
@@ -136,7 +138,7 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps)
         aria-label="Robots grid, grouped by site"
         aria-describedby="robot-grid-keys"
         onKeyDown={onKeyDown}
-        {...holdProps}
+        {...focusProps}
       >
         <div ref={contentRef} className={styles.content}>
           <canvas
@@ -199,6 +201,7 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps)
           <KeyHint keys={['g']} /> table
         </p>
       </div>
+      {notice}
     </div>
   );
 }

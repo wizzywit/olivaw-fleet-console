@@ -33,6 +33,20 @@ const viewIcons: Record<string, ReactNode> = {
 export function FleetOverviewPage() {
   const overview = useFleetOverview();
   const viewMode = useViewMode();
+  // Floats over the list and its live region is always present, so the notice never pushes the list down.
+  const heldNotice = (
+    <div role="status" data-testid="order-held-notice" className={styles.heldSlot}>
+      {overview.pendingChanges > 0 && (
+        <div className={styles.held}>
+          Order paused while you work · {overview.pendingChanges}{' '}
+          {overview.pendingChanges === 1 ? 'update' : 'updates'}
+          <Button variant="secondary" onPress={overview.resort}>
+            Re-sort
+          </Button>
+        </div>
+      )}
+    </div>
+  );
   return (
     <>
       <AppHeader />
@@ -71,15 +85,6 @@ export function FleetOverviewPage() {
                     onChange={viewMode.selectView}
                   />
                 </div>
-                {overview.pendingChanges > 0 && (
-                  <div role="status" className={styles.held}>
-                    Order paused while you work · {overview.pendingChanges}{' '}
-                    {overview.pendingChanges === 1 ? 'update' : 'updates'}
-                    <Button variant="secondary" onPress={overview.resort}>
-                      Re-sort
-                    </Button>
-                  </div>
-                )}
               </div>
               {overview.rows.length === 0 ? (
                 <EmptyState
@@ -99,6 +104,7 @@ export function FleetOverviewPage() {
                   sites={overview.sites}
                   onOpen={overview.openRobot}
                   onHeldChange={overview.setHeld}
+                  notice={heldNotice}
                 />
               ) : (
                 <RobotTable
@@ -108,6 +114,7 @@ export function FleetOverviewPage() {
                   onOpen={overview.openRobot}
                   onHeldChange={overview.setHeld}
                   describeRow={overview.describeRow}
+                  notice={heldNotice}
                 />
               )}
             </section>

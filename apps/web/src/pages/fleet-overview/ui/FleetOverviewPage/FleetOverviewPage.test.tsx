@@ -110,6 +110,20 @@ describe('fleet overview', () => {
     });
   });
 
+  it('keeps the paused notice in a region that is always there, so it appears without moving the list', async () => {
+    sendOnHello(
+      aPatch(11, [{ id: 'CLN-0142', status: 'attention', attentionReasons: ['stuck'], batteryPercent: 5 }]),
+    );
+    renderWithProviders(<FleetOverviewPage />);
+    const region = await screen.findByRole('region', { name: 'Robots, sorted by urgency' });
+    const notice = screen.getByTestId('order-held-notice');
+    expect(notice).toBeEmptyDOMElement();
+    region.focus();
+    await waitFor(() => {
+      expect(notice).toHaveTextContent(/Order paused while you work · 2 updates/);
+    });
+  });
+
   it('holds the order while the user works in the list and re-sorts on request', async () => {
     sendOnHello(
       aPatch(11, [{ id: 'CLN-0142', status: 'attention', attentionReasons: ['stuck'], batteryPercent: 5 }]),
