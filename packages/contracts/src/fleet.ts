@@ -17,16 +17,18 @@ export const fleetAggregatesDtoSchema = z.object({
         reason: attentionReasonSchema,
         priority: attentionPrioritySchema,
         count: z.number().int().positive(),
-        // Members no operator has marked seen; a robot joining the group is unseen until someone marks it.
-        unseenCount: z.number().int().nonnegative(),
+        // Members no operator has acknowledged; a robot joining the group is unacknowledged until someone acknowledges it.
+        unacknowledgedCount: z.number().int().nonnegative(),
         worstRobotId: z.string(),
         robotIds: z.array(z.string()),
       })
-      .refine((group) => group.unseenCount <= group.count, { message: 'unseenCount exceeds count' }),
+      .refine((group) => group.unacknowledgedCount <= group.count, {
+        message: 'unacknowledgedCount exceeds count',
+      }),
   ),
 });
 
-export const seenMarkRequestSchema = z.object({ robotIds: z.array(z.string()) });
+export const acknowledgeRequestSchema = z.object({ robotIds: z.array(z.string()) });
 
 const rectSchema = {
   x: z.number(),
@@ -74,4 +76,4 @@ export type SiteDto = z.infer<typeof siteDtoSchema>;
 export type SiteMapDto = SiteDto['maps'][number];
 export type FleetConfigDto = z.infer<typeof fleetConfigDtoSchema>;
 export type FleetSnapshotDto = z.infer<typeof fleetSnapshotDtoSchema>;
-export type SeenMarkRequest = z.infer<typeof seenMarkRequestSchema>;
+export type AcknowledgeRequest = z.infer<typeof acknowledgeRequestSchema>;
