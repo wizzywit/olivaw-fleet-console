@@ -1,0 +1,8 @@
+{
+  "threshold": 1,
+  "minTokens": 60,
+  "reporters": ["console"],
+  "pattern": "**/src/**/*.{ts,tsx}",
+  "ignore": ["**/node_modules/**", "**/*.test.ts", "**/*.test.tsx", "**/fixtures/**", "**/.next/**"],
+  "gitignore": true
+}
