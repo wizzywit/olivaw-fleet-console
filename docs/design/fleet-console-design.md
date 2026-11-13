@@ -9,6 +9,7 @@ A take-home for Olivaw Robotics (Senior Full Stack Engineer, frontend focus). Th
 Every line must be explainable by the author. Prefer less code that is clearly right over more code.
 
 ### The brief (Olivaw Engineering Challenge)
+
 - Three parts: robot simulator, server side (ingestion, storage, business logic behind an interface), user interface (state of the fleet, one robot in detail). Pick at least one; whatever is built must run; the rest may be faked.
 - "Note that we have described what the system is for, not what it must do": deciding what the system needs is part of the challenge.
 - Time: "should not take more than few hours", longer only by choice. Tooling: "Anything you like, AI included", but the candidate must stand behind every decision.
@@ -20,6 +21,7 @@ Working out what the system needs and does not need is part of the challenge, an
 ## 2. Goals, non-goals, anti-goals
 
 Goals
+
 - Fleet overview (table and grid views) and robot detail, with the states a real console needs: live, stale, connection lost, empty results.
 - Live updates from simulated robots that speak real robot protocols, normalised to one vendor-neutral model.
 - Holds up with 10,000 simulated robots on a laptop, with a written path to 100,000.
@@ -29,12 +31,14 @@ Goals
 - Small, conventional commits; ADRs for every significant decision; a README that answers the challenge's questions.
 
 Non-goals
+
 - Sending real commands to robots (actions like "Send to dock" are wired to a stub endpoint that records the request).
 - Authentication, multi-tenancy, user management.
 - Maps editing, orders and task planning, building integrations, the Skill Store.
 - Production deployment and infrastructure.
 
 Anti-goals (would make this a failure even if it works)
+
 - A single big commit, or commits that read as AI-generated.
 - Code the author cannot explain; clever abstractions with one user.
 - Business rules duplicated across slices or layers.
@@ -54,21 +58,22 @@ Anti-goals (would make this a failure even if it works)
 
 ## 4. Approaches considered
 
-| Decision | Options | Picked | Why |
-| --- | --- | --- | --- |
-| Scope | Frontend only with a faked backend · thin real TS backend · Go backend | Thin real TS backend | Frontend gets most of the time; ingestion, storage and the 100× story still have real code |
-| Framework | Vite + React · Next.js | Next.js, used deliberately | Matches Olivaw's stack and the role ("Next.js at architecture level"); server only prefetches the first snapshot through the same repository and adapter, so the five-layer rules hold |
-| Protocols | VDA 5050 at the edge · plus a second protocol · own JSON | VDA 5050 3.0 plus a second protocol | Proves the vendor-neutral thesis in running code: two protocols in, one model out |
-| Commits | Conventional with scopes · without scopes | With scopes | History shows where each change landed |
-| Styling | Tailwind v4 · CSS Modules · vanilla-extract | CSS Modules | Clean markup, plain CSS, no build magic |
-| Primitives | React Aria · Radix · own | React Aria | Most complete accessibility, combobox and grid support, unstyled with `data-*` states |
-| Design | Five directions on the canvas | Mix: Calm Ledger overview, Telemetry Grid scale view, Live Floorplan detail | Attention-first overview, a view that scales to 100k, a rich single-robot story |
+| Decision   | Options                                                                | Picked                                                                      | Why                                                                                                                                                                                    |
+| ---------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scope      | Frontend only with a faked backend · thin real TS backend · Go backend | Thin real TS backend                                                        | Frontend gets most of the time; ingestion, storage and the 100× story still have real code                                                                                             |
+| Framework  | Vite + React · Next.js                                                 | Next.js, used deliberately                                                  | Matches Olivaw's stack and the role ("Next.js at architecture level"); server only prefetches the first snapshot through the same repository and adapter, so the five-layer rules hold |
+| Protocols  | VDA 5050 at the edge · plus a second protocol · own JSON               | VDA 5050 3.0 plus a second protocol                                         | Proves the vendor-neutral thesis in running code: two protocols in, one model out                                                                                                      |
+| Commits    | Conventional with scopes · without scopes                              | With scopes                                                                 | History shows where each change landed                                                                                                                                                 |
+| Styling    | Tailwind v4 · CSS Modules · vanilla-extract                            | CSS Modules                                                                 | Clean markup, plain CSS, no build magic                                                                                                                                                |
+| Primitives | React Aria · Radix · own                                               | React Aria                                                                  | Most complete accessibility, combobox and grid support, unstyled with `data-*` states                                                                                                  |
+| Design     | Five directions on the canvas                                          | Mix: Calm Ledger overview, Telemetry Grid scale view, Live Floorplan detail | Attention-first overview, a view that scales to 100k, a rich single-robot story                                                                                                        |
 
 References: design canvas "Olivaw Fleet Console Directions" (https://claude.ai/artifact/Bx9YVdqAFKWqtW42Mprf7b, section "Final direction"), design system "Olivaw Console" (https://claude.ai/artifact/3woV2rTdfDWTHxMQmcRoLy). Where the canvas screens and the design-system tokens differ (border and idle colours), the design system wins.
 
 ## 5. The product
 
 ### Fleet overview (`/`)
+
 - Header: product name, main navigation, search with ⌘K hint, live connection status, theme toggle. Navigation has only real destinations: "Fleet" (`/`) and "Needs attention" with its count (`/?status=attention`). Sites are the tiles on the overview, not a separate page. No dead links.
 - Site summary: one tile per site with a status distribution bar and counts. Tiles filter the fleet.
 - "Needs your attention": robots needing attention, grouped by reason, with count, worst example and one action per group.
@@ -78,6 +83,7 @@ References: design canvas "Olivaw Fleet Console Directions" (https://claude.ai/a
 - Keyboard: `j`/`k` move, `Enter` opens, `g` toggles grid, ⌘K opens the command palette.
 
 ### Robot detail (`/robots/[robotId]`)
+
 - Breadcrumb, ID, status badge, vendor, model, serial, site and zone, protocol it speaks.
 - Primary action "Send to dock" (stub), secondary "Pause" (stub), more menu.
 - Alert banner when the robot needs attention, with what happened, the estimate and context.
@@ -88,6 +94,7 @@ References: design canvas "Olivaw Fleet Console Directions" (https://claude.ai/a
 - Reported errors, and the raw last message in its original protocol (collapsible).
 
 ### States
+
 - Connection lost: banner with reconnect countdown and "Retry now"; every value shown as last known (stale badge variant, greyed values); actions disabled.
 - Robot stale: a robot whose reports stop becomes Offline after the stale threshold, even before the broker reports it.
 - No results: removable filter chips, an explanation, a next step.
@@ -95,20 +102,25 @@ References: design canvas "Olivaw Fleet Console Directions" (https://claude.ai/a
 - Error: a failed snapshot request shows a retry with the error in plain words.
 
 ### Command palette (widget)
+
 Groups: robots, filters, actions. `Tab` turns a search into a filter. Built on React Aria combobox/listbox patterns.
 
 ### Mobile
+
 Attention-first single column, bottom navigation. Table becomes a list of robot rows; grid stays available.
 
 ## 6. Domain
 
 ### Model (vendor neutral)
+
 `Robot`: `id`, `displayName`, `vendor`, `model`, `serialNumber`, `protocol` (`vda5050` or `massrobotics`), `siteId`, `zone`, `status`, `attention` (reasons, or none), `battery` (`percent`, `charging`, `rangeMeters?`), `position` (`x`, `y`, `headingRad`, `mapId`), `speedMps`, `operatingMode`, `currentTask?` (`id`, `progress`), `errors` (normalised level and code), `lastReportAt`, `connection` (`online`, `offline`, `broken`).
 
 `Site`: `id`, `name`, `maps` (id, name, floor outline for the map view).
 
 ### Status rules (one owner: backend `robot` domain)
+
 Status is one of `working`, `charging`, `idle`, `attention`, `offline`, in this precedence:
+
 1. `offline` when the connection is `broken` or `offline`, or no report for longer than `staleAfter` (default 3 × the expected report interval).
 2. `attention` when any attention reason applies:
    - `battery-critical`: battery below the critical threshold (default 15%) and not charging
@@ -124,6 +136,7 @@ The server owns status, attention reasons, aggregates and attention groups. It r
 The client owns one rule, data freshness: when its own live connection is lost, everything on screen is shown as last known (stale badge variant, greyed values, age since the last patch) and actions are disabled. It does not flip robots to `offline`, because the problem is the console's link, not the robots. The client never recomputes status, counts or groups; its attention list renders the server's groups.
 
 ### Protocol adapters (ingest service)
+
 - Source of truth for VDA 5050: the official 3.0.0 JSON schemas in github.com/VDA5050/VDA5050 (tag `3.0.0`, commit e9ba560; `json_schemas/state.schema`, `connection.schema`, `visualization.schema`), already checked on 2026-11-13. Pin to that tag and keep copies of the example messages as fixtures; the VDA PDF wins if it differs.
 - VDA 5050 3.0: `state`, `visualization`, `connection` over MQTT (`vda5050/v3/{manufacturer}/{serialNumber}/{topic}`). Mapping uses 3.0 names: `powerSupply`, `mobileRobotPosition`, `errors[].errorLevel` (WARNING, URGENT, CRITICAL, FATAL), `operatingMode`, `safetyState.activeEmergencyStop`, `driving`, `orderId`. The connection last will (`CONNECTION_BROKEN`) drives the broken connection state.
 - Second protocol: MassRobotics AMR Interoperability Standard status messages over WebSocket, as that standard specifies. First implementation task: read its published schema (github.com/MassRobotics-AMR/AMR_Interop_Standard) and map only fields we use. If the schema cannot be confirmed, use a small documented "vendor JSON over WebSocket" format instead and say so in the ADR.
@@ -138,6 +151,7 @@ apps/simulator ──MQTT (VDA 5050)──▶ apps/ingest ──REST + WebSocket
 ```
 
 Monorepo with pnpm workspaces.
+
 - `apps/web`: Next.js console.
 - `apps/ingest`: Node + TypeScript service. Embedded MQTT broker (Aedes) and a WebSocket endpoint for robots; protocol adapters; robot domain (status rules); in-memory latest-state store; SQLite history via `node:sqlite`; HTTP API and live WebSocket for the console.
 - `apps/simulator`: Node + TypeScript. Simulates N robots across 3 sites and 5 vendors with deterministic seeds: battery drain and charge cycles, tasks, movement on site maps, injected faults (low battery, stuck, errors, emergency stop) and dropouts (closing the MQTT connection fires the last will). Configurable count and rate.
@@ -145,6 +159,7 @@ Monorepo with pnpm workspaces.
 - `packages/protocols`: VDA 5050 3.0 and MassRobotics message types (the subset we use), shared by simulator and ingest.
 
 Console API
+
 - `GET /api/fleet` → snapshot: all robots (compact), sites, aggregates (counts by status and site, attention groups), config (thresholds), and a `sequence` number.
 - `GET /api/robots/:id` → full robot including the last raw message.
 - `GET /api/robots/:id/history?range=1h|6h|24h` → downsampled battery series and events.
@@ -152,10 +167,12 @@ Console API
 - `WS /live` → batched patches every 500 ms: changed robots only (field-level), updated aggregates, `sequence`. On reconnect the client sends its last sequence; the server replies with patches since then or tells it to refetch the snapshot.
 
 Storage
+
 - Latest state in memory (a map by robot ID) is the source for snapshots and patches.
 - History in SQLite: battery and position samples downsampled to one per robot per 10 s, status changes and errors as events, kept 24 h. The history endpoint returns the battery series, the position trail (last 10 minutes) and events; the detail page appends live positions to the trail.
 
 Scale notes (README "at 100×")
+
 - Coalescing per window bounds the patch rate by robots changed, not messages received.
 - Aggregates are computed on the server, so the client never scans 100k robots to draw counts.
 - Next steps beyond this build: server-side filtering and paging for the table, subscription per view (detail gets high rate, overview gets coalesced), sharding ingest by site, a real broker cluster and a time-series store.
@@ -165,6 +182,7 @@ Scale notes (README "at 100×")
 FSD layers with the five segments, as in `FRONTEND_ARCHITECTURE.md`. Next's routing folder `app/` lives at the web app root as thin route files that re-export pages from `src/pages`; an empty root `pages/` folder stops Next treating `src/pages` as the Pages Router (verify against the FSD Next.js guide during scaffolding; record the outcome in the ADR).
 
 Initial slices (pages first; move down only when a second consumer exists):
+
 - `pages/fleet-overview`, `pages/robot-detail`
 - `widgets/app-header`, `widgets/command-palette`
 - `features/filter-fleet` (used by overview table, grid and palette), `features/toggle-theme`, `features/send-robot-command` (detail, attention list, palette)
@@ -172,12 +190,14 @@ Initial slices (pages first; move down only when a second consumer exists):
 - `shared/ui` (design-system components, one folder each), `shared/api` (HTTP client, WebSocket client with backoff), `shared/lib` (formatting, time), `shared/config`, `shared/styles` (tokens.css generated from the design-system tokens, global reset)
 
 State
+
 - TanStack Query: fleet snapshot, robot detail, history. Query keys next to their repositories. The route's server component prefetches the snapshot through the same query options and passes it with `HydrationBoundary`.
 - Zustand: the live robot map, patched from the WebSocket at most once per animation frame; components subscribe per robot or per derived slice so a patch re-renders only affected rows. Also the "order paused" queue.
 - Context: theme, live-connection client instance.
 - URL: view, filters, sort.
 
 Performance
+
 - Table virtualized with TanStack Virtual, semantic `<table>` kept, `aria-rowcount`/`aria-rowindex`.
 - Grid drawn on a canvas (one draw per frame), with one tab stop and arrow-key navigation and an announced focused robot.
 - Derived lists (filtered, sorted) memoised from store slices; sorting only on explicit re-sort or filter change while live.
