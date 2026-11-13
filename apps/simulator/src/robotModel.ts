@@ -28,6 +28,8 @@ export interface SimRobot {
   errors: Vda5050Error[];
   recoverAtMs: number | null;
   dropoutUntilMs: number | null;
+  // A dropout models losing a robot that was reporting; one that never reported would be unknown to ingest.
+  hasReported: boolean;
 }
 
 const cruiseSpeedMps = 0.6;
@@ -124,9 +126,10 @@ export function stepRobot(previous: SimRobot, dtMs: number, rng: Rng, nowMs: num
   const dtSeconds = dtMs / 1000;
 
   if (robot.dropoutUntilMs !== null && nowMs >= robot.dropoutUntilMs) robot.dropoutUntilMs = null;
-  else if (robot.dropoutUntilMs === null && rng() < dropout.perSecond * dtSeconds) {
+  else if (robot.hasReported && robot.dropoutUntilMs === null && rng() < dropout.perSecond * dtSeconds) {
     robot.dropoutUntilMs = nowMs + between(rng, ...dropout.durationMs);
   }
+  if (robot.dropoutUntilMs === null) robot.hasReported = true;
 
   switch (robot.mode) {
     case 'stuck':

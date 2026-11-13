@@ -20,6 +20,14 @@ function run(robot: SimRobot, totalMs: number, stepMs = 1000): SimRobot {
 }
 
 describe('stepRobot', () => {
+  it('never drops a robot out before it has reported once, so every robot is known to ingest', () => {
+    const alwaysDrop = () => 0;
+    const first = stepRobot(aRobot(), 1000, alwaysDrop, 0);
+    expect(first.dropoutUntilMs).toBeNull();
+    const second = stepRobot(first, 1000, alwaysDrop, 1000);
+    expect(second.dropoutUntilMs).not.toBeNull();
+  });
+
   it('drains 0.9% per minute while working', () => {
     const after = run(aRobot(), minute);
     expect(after.batteryPercent).toBeCloseTo(79.1, 2);
