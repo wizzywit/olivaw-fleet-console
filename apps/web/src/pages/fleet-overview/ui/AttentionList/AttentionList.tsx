@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import type { AttentionReason } from '@/entities/robot';
+import { MarkSeenButton } from '../MarkSeenButton/MarkSeenButton';
 import { PriorityTag } from '@/shared/ui';
 import type { AttentionGroupView } from '../../use-cases/useFleetOverview';
 import styles from './AttentionList.module.css';
@@ -64,9 +65,20 @@ export function AttentionList({ groups, total }: { groups: AttentionGroupView[];
                   {copy[group.reason].title} · {group.countLabel}
                 </span>
                 <PriorityTag priority={group.priority} />
-                {group.newCount > 0 && <span className={styles.new}>{group.newCount} new</span>}
+                {group.unseenCount > 0 ? (
+                  <span className={styles.unseen}>{group.unseenCount} unseen</span>
+                ) : (
+                  <span className={styles.seen}>All seen</span>
+                )}
               </div>
               <p className={styles.action}>{copy[group.reason].action}</p>
+              {group.unseenCount > 0 && (
+                <MarkSeenButton
+                  reason={group.reason}
+                  groupTitle={copy[group.reason].title}
+                  robotIds={group.robotIds}
+                />
+              )}
               <p className={styles.worst}>
                 Most urgent: <Link href={group.worstHref}>{group.worstLabel}</Link>
               </p>

@@ -24,10 +24,8 @@ import {
 } from '@/entities/robot';
 import { matchesFleetFilter, useFleetFilter } from '@/features/filter-fleet';
 import { formatCount, formatPercent, useNow } from '@/shared/lib';
-import { countNewInAttention } from '../services/newAttention';
 import { reconcileOrder } from '../services/stableOrder';
 
-const newAttentionWindowMs = 120_000;
 const emptyCounts: StatusCounts = { working: 0, charging: 0, idle: 0, attention: 0, offline: 0 };
 
 export interface SiteTileView {
@@ -44,7 +42,8 @@ export interface AttentionGroupView {
   priority: AttentionPriority;
   count: number;
   countLabel: string;
-  newCount: number;
+  unseenCount: number;
+  robotIds: readonly string[];
   worstHref: string;
   worstLabel: string;
 }
@@ -160,7 +159,8 @@ export function useFleetOverview() {
       priority: group.priority,
       count: group.count,
       countLabel: `${formatCount(group.count)} ${group.count === 1 ? 'robot' : 'robots'}`,
-      newCount: countNewInAttention(group.robotIds, robots, now, newAttentionWindowMs),
+      unseenCount: group.unseenCount,
+      robotIds: group.robotIds,
       worstHref: `/robots/${encodeURIComponent(group.worstRobotId)}`,
       worstLabel,
     };
