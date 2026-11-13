@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { attentionReasonSchema, robotStatusSchema, robotSummaryDtoSchema } from './robot';
+import {
+  attentionPrioritySchema,
+  attentionReasonSchema,
+  robotStatusSchema,
+  robotSummaryDtoSchema,
+} from './robot';
 
 const statusCountsSchema = z.record(robotStatusSchema, z.number().int().nonnegative());
 
@@ -9,6 +14,7 @@ export const fleetAggregatesDtoSchema = z.object({
   attentionGroups: z.array(
     z.object({
       reason: attentionReasonSchema,
+      priority: attentionPrioritySchema,
       count: z.number().int().positive(),
       worstRobotId: z.string(),
       robotIds: z.array(z.string()),

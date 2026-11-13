@@ -1,5 +1,7 @@
 export {
   robotStatuses,
+  attentionPriorities,
+  attentionPrioritySchema,
   attentionReasons,
   robotStatusSchema,
   attentionReasonSchema,
@@ -9,6 +11,7 @@ export {
   robotPatchDtoSchema,
   type RobotStatus,
   type AttentionReason,
+  type AttentionPriority,
   type ConnectionState,
   type RobotProtocol,
   type RobotSummaryDto,

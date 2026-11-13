@@ -51,8 +51,8 @@ describe('computeAggregates', () => {
       aRecord({ robotId: 'D', status: 'offline', attentionReasons: ['battery-critical'], batteryPercent: 1 }),
     ]);
     expect(aggregates.attentionGroups).toEqual([
-      { reason: 'battery-critical', count: 2, worstRobotId: 'B', robotIds: ['A', 'B'] },
-      { reason: 'stuck', count: 1, worstRobotId: 'C', robotIds: ['C'] },
+      { reason: 'battery-critical', priority: 'high', count: 2, worstRobotId: 'B', robotIds: ['A', 'B'] },
+      { reason: 'stuck', priority: 'medium', count: 1, worstRobotId: 'C', robotIds: ['C'] },
     ]);
   });
 
@@ -85,6 +85,26 @@ describe('computeAggregates', () => {
     expect(aggregates.attentionGroups.map((group) => group.reason)).toEqual([
       'emergency-stop',
       'battery-critical',
+    ]);
+  });
+
+  it('sorts high priority groups before larger medium priority groups', () => {
+    const stuck = (robotId: string) =>
+      aRecord({ robotId, status: 'attention', attentionReasons: ['stuck'], attentionSince: t(0) });
+    const aggregates = computeAggregates([
+      stuck('A'),
+      stuck('B'),
+      stuck('C'),
+      aRecord({
+        robotId: 'D',
+        status: 'attention',
+        attentionReasons: ['battery-critical'],
+        batteryPercent: 5,
+      }),
+    ]);
+    expect(aggregates.attentionGroups.map((group) => [group.reason, group.priority])).toEqual([
+      ['battery-critical', 'high'],
+      ['stuck', 'medium'],
     ]);
   });
 });

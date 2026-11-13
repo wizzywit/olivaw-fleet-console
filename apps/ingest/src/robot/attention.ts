@@ -1,4 +1,4 @@
-import type { AttentionReason } from '@olivaw/contracts';
+import type { AttentionPriority, AttentionReason } from '@olivaw/contracts';
 import type { DomainConfig, RobotRecord } from './types';
 
 export const attentionReasonOrder: readonly AttentionReason[] = [
@@ -7,6 +7,13 @@ export const attentionReasonOrder: readonly AttentionReason[] = [
   'battery-critical',
   'stuck',
 ];
+
+export const attentionPriority: Record<AttentionReason, AttentionPriority> = {
+  'emergency-stop': 'high',
+  'error-reported': 'high',
+  'battery-critical': 'high',
+  stuck: 'medium',
+};
 
 type AttentionInput = Pick<
   RobotRecord,

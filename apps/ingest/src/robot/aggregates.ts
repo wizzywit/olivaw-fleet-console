@@ -1,9 +1,11 @@
 import type { AttentionGroupDto, AttentionReason, FleetAggregatesDto, StatusCounts } from '@olivaw/contracts';
 import { siteIdForMap, sites } from '@olivaw/demo-world';
-import { attentionReasonOrder } from './attention';
+import { attentionPriority, attentionReasonOrder } from './attention';
 import type { RobotRecord } from './types';
 
 const emptyCounts = (): StatusCounts => ({ working: 0, charging: 0, idle: 0, attention: 0, offline: 0 });
+
+const priorityRank: Record<AttentionGroupDto['priority'], number> = { high: 0, medium: 1 };
 
 function worstOf(reason: AttentionReason, records: RobotRecord[]): RobotRecord {
   const sinceMs = (record: RobotRecord) => record.attentionSince?.getTime() ?? Number.POSITIVE_INFINITY;
@@ -22,13 +24,14 @@ function groupAttention(records: RobotRecord[]): AttentionGroupDto[] {
       return [
         {
           reason,
+          priority: attentionPriority[reason],
           count: members.length,
           worstRobotId: worstOf(reason, members).robotId,
           robotIds: members.map((member) => member.robotId),
         },
       ];
     })
-    .sort((a, b) => b.count - a.count);
+    .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority] || b.count - a.count);
 }
 
 export function computeAggregates(records: Iterable<RobotRecord>): FleetAggregatesDto {
