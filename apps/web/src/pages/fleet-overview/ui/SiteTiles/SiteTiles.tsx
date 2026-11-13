@@ -1,9 +1,6 @@
-import type { RobotStatus } from '@/entities/robot';
 import { StatTile } from '@/shared/ui';
 import type { SiteTileView } from '../../use-cases/useFleetOverview';
 import styles from './SiteTiles.module.css';
-
-const segments: RobotStatus[] = ['working', 'charging', 'idle', 'attention', 'offline'];
 
 export function SiteTiles({
   tiles,
@@ -20,16 +17,29 @@ export function SiteTiles({
           label={tile.name}
           value={tile.totalLabel}
           detail={tile.detail}
+          description={tile.description}
           isPressed={tile.isSelected}
           onPress={() => {
             onToggle(tile.id);
           }}
           visual={
             <span className={styles.bar} aria-hidden="true">
-              {segments.map((status) => (
-                <span key={status} className={styles[status]} style={{ flexGrow: tile.counts[status] }} />
+              {tile.breakdown.map((entry) => (
+                <span key={entry.status} className={styles[entry.status]} style={{ flexGrow: entry.count }} />
               ))}
             </span>
+          }
+          tooltip={
+            <ul className={styles.breakdown} aria-hidden="true">
+              {tile.breakdown.map((entry) => (
+                <li key={entry.status} className={styles.breakdownRow}>
+                  <span className={styles[entry.status]} data-swatch="true" />
+                  <span className={styles.breakdownLabel}>{entry.label}</span>
+                  <span className={styles.breakdownCount}>{entry.countLabel}</span>
+                  <span className={styles.breakdownPercent}>{entry.percentLabel}</span>
+                </li>
+              ))}
+            </ul>
           }
         />
       ))}

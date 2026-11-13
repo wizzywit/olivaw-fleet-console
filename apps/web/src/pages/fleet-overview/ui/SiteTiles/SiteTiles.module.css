@@ -16,6 +16,36 @@
   flex-basis: 0;
 }
 
+.breakdown {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breakdownRow {
+  display: contents;
+}
+
+.breakdownRow > [data-swatch] {
+  align-self: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.breakdownCount,
+.breakdownPercent {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdownPercent {
+  color: var(--text-muted);
+}
+
 .working {
   background: var(--working-solid);
 }

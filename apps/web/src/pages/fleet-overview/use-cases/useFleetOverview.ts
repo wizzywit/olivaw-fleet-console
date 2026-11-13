@@ -17,6 +17,7 @@ import {
 import {
   compareByUrgency,
   isBatteryCritical,
+  robotStatusLabel,
   type AttentionPriority,
   type AttentionReason,
   type Robot,
@@ -26,6 +27,7 @@ import { matchesFleetFilter, useFleetFilter } from '@/features/filter-fleet';
 import { formatCount, formatPercent, useNow } from '@/shared/lib';
 import { describeRobot } from '../services/robotDescription';
 import { reconcileOrder } from '../services/stableOrder';
+import { statusBreakdown } from '../services/statusBreakdown';
 
 // Every reason keeps its own row in this order, so the panel never changes height or reorders as counts change.
 const attentionSlots: readonly AttentionReason[] = [
@@ -42,7 +44,14 @@ export interface SiteTileView {
   name: string;
   totalLabel: string;
   detail: string;
-  counts: StatusCounts;
+  breakdown: {
+    status: RobotStatus;
+    label: string;
+    count: number;
+    countLabel: string;
+    percentLabel: string;
+  }[];
+  description: string;
   isSelected: boolean;
 }
 
@@ -197,12 +206,22 @@ export function useFleetOverview() {
   const siteTiles: SiteTileView[] = sites.map((site) => {
     const counts = aggregates?.bySite[site.id] ?? emptyCounts;
     const total = totalOf(counts);
+    const breakdown = statusBreakdown(counts).map((share) => ({
+      status: share.status,
+      label: robotStatusLabel(share.status),
+      count: share.count,
+      countLabel: formatCount(share.count),
+      percentLabel: formatPercent(share.percent),
+    }));
     return {
       id: site.id,
       name: site.name,
       totalLabel: `${formatCount(total)} robots`,
       detail: `${formatCount(counts.attention)} need attention · ${formatCount(counts.offline)} offline`,
-      counts,
+      breakdown,
+      description: breakdown
+        .map((entry) => `${entry.label} ${entry.countLabel} (${entry.percentLabel})`)
+        .join(', '),
       isSelected: filter.siteId === site.id,
     };
   });

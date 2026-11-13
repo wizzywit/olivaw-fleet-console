@@ -107,6 +107,14 @@ describe('fleet overview', () => {
     ).toBeInTheDocument();
   });
 
+  it('tells screen readers the full status breakdown of each site', async () => {
+    renderWithProviders(<FleetOverviewPage />);
+    const tile = await screen.findByRole('button', { name: /Airport T2/ });
+    expect(tile).toHaveAccessibleDescription(
+      'Working 1 (100%), Charging 0 (0%), Idle 0 (0%), Needs attention 0 (0%), Offline 0 (0%)',
+    );
+  });
+
   it('narrows the list with the status chips and keeps the choice in the url', async () => {
     renderWithProviders(<FleetOverviewPage />);
     await userEvent.click(await screen.findByRole('radio', { name: /Needs attention/ }));
