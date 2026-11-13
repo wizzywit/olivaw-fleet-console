@@ -1,0 +1,45 @@
+.meter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 500;
+}
+
+.track {
+  position: relative;
+  width: 48px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-sunken);
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.threshold {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--text-secondary);
+}
+
+.meter[data-low='true'] .fill {
+  background: var(--attention-solid);
+}
+
+.meter[data-low='true'] .value {
+  color: var(--attention-fg);
+}
+
+.meter[data-stale='true'] {
+  color: var(--text-muted);
+}
+
+.meter[data-stale='true'] .fill {
+  background: var(--border-strong);
+}

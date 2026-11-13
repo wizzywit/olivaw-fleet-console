@@ -1,0 +1,22 @@
+{
+  "headerId": 1201,
+  "timestamp": "2026-11-13T10:41:07.120Z",
+  "version": "3.0.0",
+  "manufacturer": "Nordbot",
+  "serialNumber": "CLN-0142",
+  "orderId": "ord-1a2b",
+  "orderUpdateId": 0,
+  "lastNodeId": "n-12",
+  "lastNodeSequenceId": 4,
+  "nodeStates": [{ "nodeId": "n-13", "sequenceId": 6, "released": true }],
+  "edgeStates": [{ "edgeId": "e-12-13", "sequenceId": 5, "released": true }],
+  "driving": true,
+  "actionStates": [],
+  "instantActionStates": [],
+  "powerSupply": { "stateOfCharge": 78, "charging": false, "range": 5400 },
+  "operatingMode": "AUTOMATIC",
+  "errors": [],
+  "safetyState": { "activeEmergencyStop": "NONE", "fieldViolation": false },
+  "mobileRobotPosition": { "x": 120.4, "y": 38.2, "theta": 1.57, "mapId": "t2-l0", "localized": true },
+  "velocity": { "vx": 0.6, "vy": 0, "omega": 0 }
+}

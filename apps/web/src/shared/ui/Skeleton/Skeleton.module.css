@@ -1,0 +1,5 @@
+.skeleton {
+  display: block;
+  border-radius: var(--radius-xs);
+  background: var(--surface-sunken);
+}

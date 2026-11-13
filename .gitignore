@@ -10,3 +10,6 @@ coverage/
 *.tsbuildinfo
 playwright-report/
 test-results/
+.idea/
+next-env.d.ts
+apps/web/AGENTS.md

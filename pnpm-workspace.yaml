@@ -1,0 +1,10 @@
+packages:
+  - apps/*
+  - packages/*
+
+minimumReleaseAge: 20160
+saveExact: true
+
+allowBuilds:
+  esbuild: false
+  unrs-resolver: false

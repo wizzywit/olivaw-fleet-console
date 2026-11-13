@@ -1,0 +1,87 @@
+.wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.scroll {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.row {
+  border-top: 1px solid var(--row-line);
+}
+
+.row th,
+.row td {
+  padding: 0 var(--space-5);
+  text-align: left;
+  font-weight: 400;
+}
+
+.row[data-active='true'] {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.table thead th[aria-sort] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.robot {
+  display: block;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.robot:hover {
+  text-decoration: underline;
+}
+
+.meta {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.secondary {
+  color: var(--text-secondary);
+}
+
+.right {
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.row td.right {
+  text-align: right;
+}
+
+.keys {
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+}
