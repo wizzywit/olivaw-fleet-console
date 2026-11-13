@@ -19,5 +19,5 @@ Use Next.js (App Router) and keep the server's role small and explicit: route fi
 
 ## Consequences
 
-- Server rendering only speeds up the first paint; the five-layer rules hold unchanged.
+- Server rendering delivers the snapshot with the page, so hydration needs no extra request; the first paint is the loading state because the live store is seeded on the client only (it is module state shared across requests on the server). The five-layer rules hold unchanged.
 - On-prem: `output: 'standalone'` produces one Node image; a static export is possible if the prefetch is dropped.

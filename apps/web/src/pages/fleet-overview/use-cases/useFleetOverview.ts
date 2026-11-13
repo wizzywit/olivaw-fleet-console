@@ -180,7 +180,7 @@ export function useFleetOverview() {
   });
 
   let state: 'loading' | 'error' | 'ready' = 'ready';
-  if (repository.isLoading && robots.size === 0) state = 'loading';
+  if (repository.isLoading) state = 'loading';
   else if (repository.error !== null && robots.size === 0) state = 'error';
 
   return {

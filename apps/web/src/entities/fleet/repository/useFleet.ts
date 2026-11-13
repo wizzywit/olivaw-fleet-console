@@ -8,10 +8,12 @@ import { fleetSnapshotQuery } from './fleetSnapshotQuery';
 
 const useFleetState = <T>(selector: (state: FleetLiveState) => T): T => useStore(fleetLiveStore, selector);
 
+// Loading lasts until the live store is seeded, so no screen ever shows an empty fleet that is really just unseeded.
 export function useFleetRepository() {
   const query = useQuery(fleetSnapshotQuery());
+  const isSeeded = useFleetState((state) => state.sequence !== null);
   return {
-    isLoading: query.isPending,
+    isLoading: query.isPending || (!isSeeded && query.error === null),
     error: query.error,
     refetch: () => {
       void query.refetch();
