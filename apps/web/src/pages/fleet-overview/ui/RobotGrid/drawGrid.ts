@@ -7,7 +7,6 @@ export interface GridColors {
   surface: string;
   text: string;
   muted: string;
-  focus: string;
   font: string;
 }
 
@@ -33,7 +32,6 @@ export function readGridColors(element: Element): GridColors {
     surface: token('--surface'),
     text: token('--text'),
     muted: token('--text-muted'),
-    focus: token('--focus-ring'),
     // Canvas cannot resolve CSS variables, so the font comes from the computed style.
     font: `600 12px ${style.fontFamily}`,
   };
@@ -73,12 +71,12 @@ function drawHatch(ctx: CanvasRenderingContext2D, x: number, y: number, size: nu
   ctx.stroke();
 }
 
-export function drawGrid(
+// Draws every cell; runs only when the robots, layout or theme change. Focus is a separate element on top.
+export function drawCells(
   ctx: CanvasRenderingContext2D,
   layout: GridLayout,
   rowAt: (index: number) => RobotRowView | undefined,
   colors: GridColors,
-  focusIndex: number | null,
 ) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.font = colors.font;
@@ -98,11 +96,5 @@ export function drawGrid(
       ctx.lineWidth = 1;
       drawHatch(ctx, cell.x, cell.y, layout.cell);
     }
-  }
-  const focused = focusIndex === null ? undefined : layout.cells[focusIndex];
-  if (focused !== undefined) {
-    ctx.strokeStyle = colors.focus;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(focused.x - 2, focused.y - 2, layout.cell + 4, layout.cell + 4);
   }
 }

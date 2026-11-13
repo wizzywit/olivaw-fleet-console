@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { hitTest, indexForId, layoutGrid, neighbour, type GridDirection } from '../services/gridLayout';
 import { describeRobot } from '../services/robotDescription';
 import type { RobotRowView } from './useFleetOverview';
@@ -28,10 +28,14 @@ export function useRobotGrid(
 ) {
   const layout = useMemo(() => layoutGrid(rows, sites, gridOptions(width)), [rows, sites, width]);
   const rowById = useMemo(() => new Map(rows.map((row) => [row.id, row])), [rows]);
-  const rowAt = (index: number) => {
-    const cell = layout.cells[index];
-    return cell === undefined ? undefined : rowById.get(cell.id);
-  };
+  // Stable between renders so the canvas redraws only when the robots or layout change, not on focus moves.
+  const rowAt = useCallback(
+    (index: number) => {
+      const cell = layout.cells[index];
+      return cell === undefined ? undefined : rowById.get(cell.id);
+    },
+    [layout, rowById],
+  );
   return {
     layout,
     rowAt,

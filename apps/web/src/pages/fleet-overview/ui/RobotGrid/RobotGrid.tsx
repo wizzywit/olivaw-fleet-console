@@ -15,7 +15,7 @@ import { KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
 import { useHoldWhileWorking } from '../../use-cases/useHoldWhileWorking';
 import { useRobotGrid } from '../../use-cases/useRobotGrid';
-import { drawGrid, readGridColors } from './drawGrid';
+import { drawCells, readGridColors } from './drawGrid';
 import styles from './RobotGrid.module.css';
 import { tooltipPlacement, type TooltipPlacement } from './tooltipPlacement';
 
@@ -78,6 +78,8 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange, notice }: RobotGr
     setHovered(null);
   });
   const focusIndex = grid.follow(focusedId, lastIndex);
+  const { layout, rowAt } = grid;
+  const focusedCell = hasFocus ? layout.cells[focusIndex] : undefined;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -85,17 +87,17 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange, notice }: RobotGr
     if (canvas === null || ctx === null) return;
     const frame = requestAnimationFrame(() => {
       const ratio = window.devicePixelRatio || 1;
-      canvas.width = Math.max(1, Math.round(grid.layout.width * ratio));
-      canvas.height = Math.max(1, Math.round(grid.layout.height * ratio));
-      canvas.style.width = `${String(grid.layout.width)}px`;
-      canvas.style.height = `${String(grid.layout.height)}px`;
+      canvas.width = Math.max(1, Math.round(layout.width * ratio));
+      canvas.height = Math.max(1, Math.round(layout.height * ratio));
+      canvas.style.width = `${String(layout.width)}px`;
+      canvas.style.height = `${String(layout.height)}px`;
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-      drawGrid(ctx, grid.layout, grid.rowAt, readGridColors(canvas), hasFocus ? focusIndex : null);
+      drawCells(ctx, layout, rowAt, readGridColors(canvas));
     });
     return () => {
       cancelAnimationFrame(frame);
     };
-  }, [grid, focusIndex, hasFocus, themeVersion]);
+  }, [layout, rowAt, themeVersion]);
 
   const focusOn = (index: number) => {
     const cell = grid.layout.cells[index];
@@ -163,6 +165,17 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange, notice }: RobotGr
               setHovered(index === null ? null : { index, placement: tooltipPlacement({ x, y }, view) });
             }}
           />
+          {focusedCell !== undefined && (
+            <div
+              className={styles.focusRing}
+              aria-hidden="true"
+              style={{
+                transform: `translate(${String(focusedCell.x - 3)}px, ${String(focusedCell.y - 3)}px)`,
+                width: layout.cell + 6,
+                height: layout.cell + 6,
+              }}
+            />
+          )}
           {hovered !== null && hoveredRow !== undefined && (
             <div
               className={styles.tooltip}
