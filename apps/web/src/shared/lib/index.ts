@@ -3,4 +3,5 @@ export { formatClockTime, formatCount, formatPercent, formatRelativeTime } from 
 export { replaceSearchParams } from './searchParams';
 export { useKeyboardShortcut, type KeyboardShortcut } from './useKeyboardShortcut';
 export { takeSmallest } from './takeSmallest';
+export { useShortcutModifier } from './useShortcutModifier';
 export { useNow } from './useNow';

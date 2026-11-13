@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import Link from 'next/link';
 import { FleetSearchField } from '@/features/filter-fleet';
 import { ThemeToggleButton } from '@/features/toggle-theme';
+import { useShortcutModifier } from '@/shared/lib';
 import { Button } from '@/shared/ui';
 import { useAppHeader } from '../../use-cases/useAppHeader';
 import { useCommandPalette } from '../../use-cases/useCommandPalette';
@@ -13,6 +14,7 @@ import styles from './AppHeader.module.css';
 export function AppHeader() {
   const header = useAppHeader();
   const palette = useCommandPalette();
+  const modifier = useShortcutModifier();
   return (
     <header className={styles.header}>
       <span className={styles.brand}>olivaw</span>
@@ -33,7 +35,7 @@ export function AppHeader() {
       </nav>
       <div className={styles.search}>
         <FleetSearchField
-          shortcut={{ keys: ['⌘', 'K'], label: 'Open command palette', onPress: palette.open }}
+          shortcut={{ keys: [modifier, 'K'], label: 'Open command palette', onPress: palette.open }}
         />
       </div>
       <span role="status" className={styles.status}>

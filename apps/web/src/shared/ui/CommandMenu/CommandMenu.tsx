@@ -13,7 +13,6 @@ import {
   Modal,
   ModalOverlay,
   SearchField,
-  Text,
 } from 'react-aria-components';
 import styles from './CommandMenu.module.css';
 
@@ -21,6 +20,7 @@ export interface CommandMenuItem {
   id: string;
   label: string;
   detail?: string;
+  shortcut?: string;
 }
 
 export interface CommandMenuSection {
@@ -81,13 +81,18 @@ export function CommandMenu({
                   <Header className={clsx(styles.sectionTitle)}>{section.title}</Header>
                   {section.items.map((item) => (
                     <MenuItem key={item.id} id={item.id} textValue={item.label} className={clsx(styles.item)}>
-                      <Text slot="label" className={clsx(styles.itemLabel)}>
-                        {item.label}
-                      </Text>
+                      {/* Label and detail are both visible, so both form the name (WCAG 2.5.3); the key hint is only decoration. */}
+                      <span className={clsx(styles.itemLabel)}>{item.label}</span>
                       {item.detail !== undefined && (
-                        <Text slot="description" className={clsx(styles.itemDetail)}>
-                          {item.detail}
-                        </Text>
+                        <>
+                          {' '}
+                          <span className={clsx(styles.itemDetail)}>{item.detail}</span>
+                        </>
+                      )}
+                      {item.shortcut !== undefined && (
+                        <kbd className={clsx(styles.itemShortcut)} aria-hidden="true">
+                          {item.shortcut}
+                        </kbd>
                       )}
                     </MenuItem>
                   ))}

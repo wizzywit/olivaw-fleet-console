@@ -8,7 +8,7 @@ pnpm dev          # ingest on :4000 (MQTT :1883), 1,200 simulated robots, consol
 pnpm demo:10k     # the same with 10,000 robots and a production build of the console
 ```
 
-Node 24 and pnpm 12 are required. `pnpm test`, `pnpm lint`, `pnpm typecheck` and `pnpm build` run across the workspace.
+Node 24 and pnpm 12 are required. `pnpm test`, `pnpm lint`, `pnpm typecheck` and `pnpm build` run across the workspace; `pnpm test:e2e` runs the Playwright end-to-end tests (it builds and starts the system itself).
 
 ## What a fleet manager needs, and what it does not
 
@@ -90,7 +90,7 @@ The work was planned in vertical slices so that whatever is finished is complete
 
 1. **Core (done):** everything above.
 2. **Scale (done):** a canvas grid view of the whole fleet with keyboard navigation, a measured 10,000-robot profile with fixes, a command palette, shared acknowledgement of attention groups. The optional fleet map was left for later (see below).
-3. **Depth:** MassRobotics as a second protocol, SQLite history (battery chart, trail, activity), mobile layout, Playwright end-to-end tests with axe in both themes.
+3. **Depth:** Playwright end-to-end tests with axe in both themes (done, in CI). Not built: MassRobotics as a second protocol, SQLite history (battery chart, trail, activity), mobile layout.
 
 ## Performance at 10,000 robots
 
@@ -127,7 +127,7 @@ What breaks first with hundreds of thousands of robots, and what I would change:
 
 ## Testing
 
-305 tests: exact-boundary unit tests for every rule, adapter tests against fixtures from the official schemas, an ingest integration test over real MQTT and WebSocket, and React Testing Library journeys with MSW for HTTP and WebSocket ([ADR 0012](docs/adr/0012-testing-strategy.md)). Tests were written first; where one was written after its code, I broke the behavior on purpose to see it fail (the resync handler, the disabled command buttons).
+305 unit, adapter, integration and journey tests, plus 11 Playwright end-to-end tests (`pnpm test:e2e`) against the real system with axe accessibility checks in both themes: exact-boundary unit tests for every rule, adapter tests against fixtures from the official schemas, an ingest integration test over real MQTT and WebSocket, and React Testing Library journeys with MSW for HTTP and WebSocket ([ADR 0012](docs/adr/0012-testing-strategy.md)). Tests were written first; where one was written after its code, I broke the behavior on purpose to see it fail (the resync handler, the disabled command buttons).
 
 I also ran the whole system in a browser: live updates, filters, the held order, the detail page, and killing and restarting ingest while the console was open. That run found two real bugs that unit tests had missed: a hydration mismatch in the theme toggle and simulated robots not reconnecting after a broker restart. Both are fixed, with a regression test for the first.
 

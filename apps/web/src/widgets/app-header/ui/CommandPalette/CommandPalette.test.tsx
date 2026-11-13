@@ -29,7 +29,9 @@ describe('command palette', () => {
     const dialog = await openPalette();
     await userEvent.keyboard('0087');
     const robots = within(dialog).getByRole('group', { name: 'Robots' });
-    expect(within(robots).getByRole('menuitem', { name: /DLV-0087/ })).toBeInTheDocument();
+    expect(
+      within(robots).getByRole('menuitem', { name: 'DLV-0087 Needs attention · Hotel Isar · battery 12%' }),
+    ).toBeInTheDocument();
     await userEvent.keyboard('{Enter}');
     expect(navigation.push).toHaveBeenCalledWith('/robots/DLV-0087');
   });
@@ -78,7 +80,7 @@ describe('command palette', () => {
 
   it('opens from the button in the search field and returns focus to the search on Escape', async () => {
     await renderLoaded();
-    const trigger = screen.getByRole('button', { name: 'Open command palette' });
+    const trigger = screen.getByRole('button', { name: 'Open command palette Ctrl K' });
     await userEvent.click(trigger);
     await screen.findByRole('dialog', { name: 'Command palette' });
     await userEvent.keyboard('{Escape}');

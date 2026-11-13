@@ -15,7 +15,9 @@
     "cpd": "jscpd",
     "format": "prettier --write .",
     "dev": "concurrently --names ingest,simulator,web --prefix-colors blue,magenta,green \"pnpm --filter ingest dev\" \"pnpm --filter simulator dev\" \"pnpm --filter web dev\"",
-    "demo:10k": "pnpm --filter web build && concurrently --names ingest,simulator,web --prefix-colors blue,magenta,green \"pnpm --filter ingest dev\" \"pnpm --filter simulator dev --robots 10000\" \"pnpm --filter web start\""
+    "demo:10k": "pnpm --filter web build && concurrently --names ingest,simulator,web --prefix-colors blue,magenta,green \"pnpm --filter ingest dev\" \"pnpm --filter simulator dev --robots 10000\" \"pnpm --filter web start\"",
+    "e2e:serve": "pnpm --filter web build && concurrently --names ingest,simulator,web --prefix-colors blue,magenta,green \"pnpm --filter ingest start\" \"pnpm --filter simulator start --robots 300\" \"pnpm --filter web start\"",
+    "test:e2e": "pnpm --filter e2e e2e"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
