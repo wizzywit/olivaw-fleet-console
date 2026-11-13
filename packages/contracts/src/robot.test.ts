@@ -16,7 +16,6 @@ const summary = {
   attentionSince: '2026-11-13T10:38:00.000Z',
   batteryPercent: 12,
   charging: false,
-  position: { x: 41.2, y: 8.7, headingRad: 1.57, mapId: 'isar-f4' },
   speedMps: 0.6,
   operatingMode: 'AUTOMATIC',
   taskId: 'ord-55a1',
@@ -24,7 +23,23 @@ const summary = {
   connection: 'online',
 };
 
+const position = { x: 41.2, y: 8.7, headingRad: 1.57, mapId: 'isar-f4' };
+
 describe('robot contracts', () => {
+  it('keeps the position out of the fleet summary, because it changes every second for moving robots', () => {
+    expect(Object.keys(robotSummaryDtoSchema.parse({ ...summary, position }))).not.toContain('position');
+  });
+
+  it('puts the position on the robot detail', () => {
+    const extras = {
+      serialNumber: 'DLV-0087',
+      errors: [],
+      rawMessage: { protocol: 'vda5050', receivedAt: '2026-11-13T10:41:07.120Z', payload: {} },
+    };
+    expect(robotDetailDtoSchema.safeParse({ ...summary, ...extras }).success).toBe(false);
+    expect(robotDetailDtoSchema.parse({ ...summary, ...extras, position }).position).toEqual(position);
+  });
+
   it('parses a robot summary', () => {
     expect(robotSummaryDtoSchema.parse(summary).status).toBe('attention');
   });
@@ -37,6 +52,7 @@ describe('robot contracts', () => {
     const detail = robotDetailDtoSchema.parse({
       ...summary,
       serialNumber: 'DLV-0087',
+      position,
       errors: [{ level: 'urgent', code: 'BATTERY_LOW', description: null }],
       rawMessage: { protocol: 'vda5050', receivedAt: summary.lastReportAt, payload: { headerId: 1 } },
     });

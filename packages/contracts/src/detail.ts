@@ -1,10 +1,11 @@
 import { z } from 'zod';
-import { robotProtocolSchema, robotSummaryDtoSchema } from './robot';
+import { robotPositionSchema, robotProtocolSchema, robotSummaryDtoSchema } from './robot';
 
 export const errorLevelSchema = z.enum(['warning', 'urgent', 'critical', 'fatal']);
 
 export const robotDetailDtoSchema = robotSummaryDtoSchema.extend({
   serialNumber: z.string(),
+  position: robotPositionSchema,
   errors: z.array(
     z.object({ level: errorLevelSchema, code: z.string(), description: z.string().nullable() }),
   ),

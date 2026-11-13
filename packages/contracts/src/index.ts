@@ -16,6 +16,8 @@ export {
   type RobotProtocol,
   type RobotSummaryDto,
   type RobotPatchDto,
+  type RobotPosition,
+  robotPositionSchema,
 } from './robot';
 export {
   fleetAggregatesDtoSchema,

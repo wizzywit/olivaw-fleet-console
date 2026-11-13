@@ -5,6 +5,7 @@ import {
   type FleetAggregatesDto,
   type RobotDetailDto,
   type RobotPatchDto,
+  type RobotPosition,
   type RobotSummaryDto,
 } from '@olivaw/contracts';
 import { siteIdForMap, zoneAt } from '@olivaw/demo-world';
@@ -37,12 +38,6 @@ function toSummary(record: RobotRecord, siteId: string): RobotSummaryDto {
     // Floored so a robot shown at 15% is never also flagged as below 15%.
     batteryPercent: Math.floor(record.batteryPercent),
     charging: record.charging,
-    position: {
-      x: toFixedStep(record.x, 0.1, 1),
-      y: toFixedStep(record.y, 0.1, 1),
-      headingRad: toFixedStep(record.headingRad, 0.01, 2),
-      mapId: record.mapId,
-    },
     speedMps: toFixedStep(record.speedMps, 0.1, 1),
     operatingMode: record.operatingMode,
     taskId: record.taskId,
@@ -51,16 +46,24 @@ function toSummary(record: RobotRecord, siteId: string): RobotSummaryDto {
   };
 }
 
+const toPosition = (record: RobotRecord): RobotPosition => ({
+  x: toFixedStep(record.x, 0.1, 1),
+  y: toFixedStep(record.y, 0.1, 1),
+  headingRad: toFixedStep(record.headingRad, 0.01, 2),
+  mapId: record.mapId,
+});
+
 const derivedState = (record: RobotRecord) =>
   `${record.status}|${record.attentionReasons.join(',')}|${String(record.attentionSince?.getTime())}`;
 
 function diffSummary(previous: RobotSummaryDto | undefined, next: RobotSummaryDto): RobotPatchDto | null {
   if (previous === undefined) return next;
   const before: Readonly<Record<string, unknown>> = previous;
-  const changed = Object.entries(next).filter(
-    ([key, value]) => JSON.stringify(before[key]) !== JSON.stringify(value),
-  );
-  if (changed.length === 0) return null;
+  const differs = ([key, value]: [string, unknown]) => JSON.stringify(before[key]) !== JSON.stringify(value);
+  // Every report moves lastReportAt, so on its own it would put the whole fleet in every patch. It rides along with
+  // real changes instead, including going offline, where it marks the robot's last report.
+  if (!Object.entries(next).some((entry) => entry[0] !== 'lastReportAt' && differs(entry))) return null;
+  const changed = Object.entries(next).filter(differs);
   return robotPatchDtoSchema.parse({ ...Object.fromEntries(changed), id: next.id });
 }
 
@@ -144,7 +147,8 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
         if (entry === undefined) continue;
         const summary = toSummary(entry.record, entry.siteId);
         const patch = diffSummary(lastSent.get(robotId), summary);
-        if (patch !== null) changed.push(patch);
+        if (patch === null) continue;
+        changed.push(patch);
         lastSent.set(robotId, summary);
       }
       touched.clear();
@@ -169,6 +173,7 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
       return {
         ...toSummary(record, siteId),
         serialNumber: record.serialNumber,
+        position: toPosition(record),
         errors: record.errors,
         rawMessage: {
           protocol: record.protocol,
