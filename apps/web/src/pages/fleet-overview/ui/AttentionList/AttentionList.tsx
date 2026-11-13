@@ -68,12 +68,9 @@ export function AttentionList({ groups, total }: { groups: AttentionGroupView[];
                   {copy[group.reason].title} · {group.countLabel}
                 </span>
                 {group.priority !== null && <PriorityTag priority={group.priority} />}
-                {!group.isClear &&
-                  (group.unacknowledgedCount > 0 ? (
-                    <span className={styles.unacknowledged}>{group.unacknowledgedCount} unacknowledged</span>
-                  ) : (
-                    <span className={styles.acknowledged}>All acknowledged</span>
-                  ))}
+                {group.unacknowledgedCount > 0 && (
+                  <span className={styles.unacknowledged}>{group.unacknowledgedCount} unacknowledged</span>
+                )}
               </div>
               <p className={styles.action}>{copy[group.reason].action}</p>
               <p className={styles.worst}>
@@ -87,11 +84,12 @@ export function AttentionList({ groups, total }: { groups: AttentionGroupView[];
               </p>
             </div>
             <div className={styles.actionArea}>
-              {group.unacknowledgedCount > 0 && (
+              {!group.isClear && (
                 <AcknowledgeButton
                   reason={group.reason}
                   groupTitle={copy[group.reason].title}
                   robotIds={group.robotIds}
+                  isAcknowledged={group.unacknowledgedCount === 0}
                 />
               )}
             </div>

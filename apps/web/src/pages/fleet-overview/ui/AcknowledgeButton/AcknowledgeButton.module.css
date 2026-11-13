@@ -1,10 +1,27 @@
 .wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: flex-end;
+}
+
+.done {
   display: inline-flex;
-  gap: var(--space-2);
   align-items: center;
+  min-height: var(--control-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.done:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .error {
   color: var(--attention-fg);
   font-size: 12px;
+  text-align: right;
 }

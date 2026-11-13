@@ -73,8 +73,47 @@ describe('fleet overview', () => {
     );
     renderWithProviders(<FleetOverviewPage />);
     const attention = await screen.findByRole('region', { name: /Needs your attention/ });
-    expect(await within(attention).findByText('All acknowledged')).toBeInTheDocument();
+    expect(await within(attention).findByText('Acknowledged')).toBeInTheDocument();
     expect(within(attention).queryByRole('button', { name: /^Acknowledge/ })).not.toBeInTheDocument();
+  });
+
+  it('keeps keyboard focus and announces it when a group becomes acknowledged', async () => {
+    const acknowledged = aSnapshotDto().aggregates.attentionGroups.map((group) => ({
+      ...group,
+      unacknowledgedCount: 0,
+    }));
+    server.use(
+      http.post('*/api/attention-groups/battery-critical/acknowledge', () => {
+        liveLink.broadcast(
+          JSON.stringify(
+            aPatch(11, [], { aggregates: { ...aSnapshotDto().aggregates, attentionGroups: acknowledged } }),
+          ),
+        );
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    renderWithProviders(<FleetOverviewPage />);
+    const button = await screen.findByRole('button', { name: 'Acknowledge Battery critical' });
+    await waitFor(() => {
+      expect(button).toBeEnabled();
+    });
+    button.focus();
+    await userEvent.keyboard('{Enter}');
+    const done = await screen.findByText('Acknowledged');
+    await waitFor(() => {
+      expect(done).toHaveFocus();
+    });
+    expect(screen.getByText('Battery critical acknowledged')).toBeInTheDocument();
+  });
+
+  it('disables acknowledging while live updates are paused', async () => {
+    renderWithProviders(<FleetOverviewPage />);
+    const button = await screen.findByRole('button', { name: 'Acknowledge Battery critical' });
+    await waitFor(() => {
+      expect(button).toBeEnabled();
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Pause live updates' }));
+    expect(button).toBeDisabled();
   });
 
   it('says when an acknowledgement could not be saved', async () => {

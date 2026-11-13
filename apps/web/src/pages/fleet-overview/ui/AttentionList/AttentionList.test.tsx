@@ -23,7 +23,7 @@ const wrapper = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-const item = () => screen.getByText(/Battery critical/).closest('li');
+const item = () => screen.getByText(/Battery critical ·/).closest('li');
 
 describe('AttentionList', () => {
   it('highlights a group that grew for two seconds, even while the page keeps re-rendering', () => {

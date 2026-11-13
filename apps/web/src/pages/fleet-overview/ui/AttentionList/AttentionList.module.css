@@ -55,6 +55,9 @@
 .actionArea {
   display: flex;
   justify-content: flex-end;
+
+  /* Fixed, so the button, the Acknowledged label or an error never change the width of the text column. */
+  width: 10rem;
 }
 
 .title {
@@ -68,11 +71,6 @@
   color: var(--accent-text);
   font-size: 12px;
   font-weight: 600;
-}
-
-.acknowledged {
-  color: var(--text-muted);
-  font-size: 12px;
 }
 
 .action,
