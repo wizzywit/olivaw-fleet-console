@@ -1,9 +1,9 @@
 'use client';
 
-import { SearchField } from '@/shared/ui';
+import { SearchField, type SearchFieldProps } from '@/shared/ui';
 import { useFleetFilter } from '../../use-cases/useFleetFilter';
 
-export function FleetSearchField() {
+export function FleetSearchField({ shortcut }: Pick<SearchFieldProps, 'shortcut'>) {
   const { filter, setQuery } = useFleetFilter();
   return (
     <SearchField
@@ -11,6 +11,7 @@ export function FleetSearchField() {
       placeholder="Search, or filter: battery:<20 site:isar"
       value={filter.rawQuery}
       onChange={setQuery}
+      {...(shortcut === undefined ? {} : { shortcut })}
     />
   );
 }

@@ -11,7 +11,6 @@ export function useViewMode() {
   const toggleView = () => {
     setView(view === 'grid' ? 'table' : 'grid');
   };
-  useKeyboardShortcut({ key: 'g' }, toggleView);
   return {
     view,
     options: [
@@ -23,4 +22,10 @@ export function useViewMode() {
     },
     toggleView,
   };
+}
+
+// Registered once by the fleet page; the command palette also uses useViewMode and must not toggle a second time.
+export function useViewModeShortcut(): void {
+  const { toggleView } = useViewMode();
+  useKeyboardShortcut({ key: 'g' }, toggleView);
 }

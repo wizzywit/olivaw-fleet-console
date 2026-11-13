@@ -1,2 +1,2 @@
 export type { ViewMode } from './types/viewMode';
-export { useViewMode } from './use-cases/useViewMode';
+export { useViewMode, useViewModeShortcut } from './use-cases/useViewMode';
