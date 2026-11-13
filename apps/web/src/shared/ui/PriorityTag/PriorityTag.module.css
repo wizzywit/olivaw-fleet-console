@@ -1,0 +1,21 @@
+.tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.high {
+  border-color: var(--attention-border);
+  background: var(--attention-bg);
+  color: var(--attention-fg);
+}
+
+.medium {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text-secondary);
+}
