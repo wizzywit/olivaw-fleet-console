@@ -16,7 +16,7 @@
   - Inside a slice, segments follow ARCHITECTURE.md §4 (for example, a view may not import an adapter), and only within the same slice.
   - Across slices, only the public API (`index.ts`) of a lower layer may be imported: no upward, sideways or deep imports. Entities reach each other only through `@x`.
   - Only adapters may use `shared/api`; `no-restricted-imports` keeps Zustand and TanStack Query in `repository/` and React Aria in `shared/ui`.
-  - Steiger runs as a second net for FSD rules. Two of its rules are off: Steiger only recognises FSD's `ui/api/lib/model/config` segment names, so it would reject the five-layer names this architecture requires and would not treat slices without a `ui` segment as slices.
+  - Steiger runs as a second net for FSD rules. Two of its rules are off: Steiger only recognizes FSD's `ui/api/lib/model/config` segment names, so it would reject the five-layer names this architecture requires and would not treat slices without a `ui` segment as slices.
 - Live connection state lives in `entities/fleet` (its adapter owns the WebSocket) rather than a separate `entities/live-connection`, because only fleet data travels on that socket.
 
 ## Consequences

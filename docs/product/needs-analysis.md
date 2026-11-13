@@ -44,7 +44,7 @@ Does not need: physics, path planning, collision avoidance, executing real order
 Needs to:
 
 - Accept ~1 message per robot per second, validate it, and drop bad messages without losing the robot's last good state.
-- Normalise each protocol into one model behind an adapter.
+- Normalize each protocol into one model behind an adapter.
 - Decide status and attention in one place, and notice silence two ways (broker last will, and a stale sweep).
 - Give the console a snapshot plus small, coalesced, sequenced updates, so a reconnecting client never misses or double-applies a change.
 - Keep short, downsampled history (battery, position, events) for the detail view.
@@ -65,15 +65,15 @@ Needs to:
 - Stay readable and fast at 10,000+ robots: virtualized table, server-computed counts, a dense grid view that shows the whole fleet at once.
 - Never move rows under the user's hands while live data arrives; offer an explicit pause of live updates that resumes to the current state.
 - Be honest about freshness: last-heard time per robot, stale values marked by exception and kept as last known, a banner when the console's own connection drops.
-- Show values against their normal range (battery against its threshold) and never use colour alone.
+- Show values against their normal range (battery against its threshold) and never use color alone.
 - Draw attention to what is new without moving everything: one brief cue for a new attention item, none with reduced motion.
 - Work with keyboard and screen readers, in light and dark, and on a phone for the "on the move" check.
 
 Does not need (in this build):
 
-- A map of the whole fleet as the default view. A map answers "where", not "what's wrong", so the default is organised by attention; location is text on each row and a map on the robot detail. A fleet map can be a secondary view (tier 2 option). Note that several products (Open-RMF's dashboard, Formant, MiR) do offer a map up front; the choice here is about the question the default screen answers.
+- A map of the whole fleet as the default view. A map answers "where", not "what's wrong", so the default is organized by attention; location is text on each row and a map on the robot detail. A fleet map can be a secondary view (tier 2 option). Note that several products (Open-RMF's dashboard, Formant, MiR) do offer a map up front; the choice here is about the question the default screen answers.
 - Animating every robot at 1 Hz: motion in the periphery captures attention involuntarily and many simultaneous animations overwhelm; values update in place.
-- Historical analytics and reports (utilisation per week, cleaning coverage): a different user and moment. The few live numbers that answer "is the fleet OK right now" (counts per status and site) are in scope.
+- Historical analytics and reports (utilization per week, cleaning coverage): a different user and moment. The few live numbers that answer "is the fleet OK right now" (counts per status and site) are in scope.
 - Per-robot live charts for the whole fleet: one robot's battery history on its detail page is enough.
 - Editing robots, fleets or sites.
 

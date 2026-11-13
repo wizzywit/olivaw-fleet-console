@@ -28,4 +28,4 @@ An earlier version wrapped the store instance in a React context; it was replace
 ## Consequences
 
 - Fetching, caching and live updates each have one owner; views read through use cases.
-- Pausing, hidden-tab handling and resync are behaviour of the store, covered by tests with an injected scheduler.
+- Pausing, hidden-tab handling and resync are behavior of the store, covered by tests with an injected scheduler.

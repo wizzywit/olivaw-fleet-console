@@ -23,7 +23,7 @@ Working out what the system needs and does not need is part of the challenge, an
 Goals
 
 - Fleet overview (table and grid views) and robot detail, with the states a real console needs: live, stale, connection lost, empty results.
-- Live updates from simulated robots that speak real robot protocols, normalised to one vendor-neutral model.
+- Live updates from simulated robots that speak real robot protocols, normalized to one vendor-neutral model.
 - Holds up with 10,000 simulated robots on a laptop, with a written path to 100,000.
 - Accessible (WCAG 2.2 AA), light and dark themes, keyboard first.
 - Clean FSD + five-layer architecture, enforced by lint.
@@ -69,7 +69,7 @@ Anti-goals (would make this a failure even if it works)
 | Primitives | React Aria · Radix · own                                               | React Aria                                                                  | Most complete accessibility, combobox and grid support, unstyled with `data-*` states                                                                                                  |
 | Design     | Five directions on the canvas                                          | Mix: Calm Ledger overview, Telemetry Grid scale view, Live Floorplan detail | Attention-first overview, a view that scales to 100k, a rich single-robot story                                                                                                        |
 
-References: design canvas "Olivaw Fleet Console Directions" (https://claude.ai/artifact/Bx9YVdqAFKWqtW42Mprf7b, section "Final direction"), design system "Olivaw Console" (https://claude.ai/artifact/3woV2rTdfDWTHxMQmcRoLy). Where the canvas screens and the design-system tokens differ (border and idle colours), the design system wins.
+References: design canvas "Olivaw Fleet Console Directions" (https://claude.ai/artifact/Bx9YVdqAFKWqtW42Mprf7b, section "Final direction"), design system "Olivaw Console" (https://claude.ai/artifact/3woV2rTdfDWTHxMQmcRoLy). Where the canvas screens and the design-system tokens differ (border and idle colors), the design system wins.
 
 ## 5. The product
 
@@ -80,7 +80,7 @@ References: design canvas "Olivaw Fleet Console Directions" (https://claude.ai/a
 - "Needs your attention": robots needing attention, grouped by reason. Each group shows its priority (high or medium, set by the server), the required action in plain words, the count, the worst robot, and how many members are new (entered attention in the last 2 minutes). Groups sort by priority, then count. A group that gains members gets one brief highlight, none with `prefers-reduced-motion`.
 - Robot list as a table (default) or grid (one cell per robot, grouped by site). The view, filters and sort live in the URL so a view can be shared and survives reload.
 - Status filter chips with live counts; text search and filter syntax (`site:`, `status:`, `battery:<20`, `vendor:`).
-- Live behaviour: values update in place; ordering changes are held while the user interacts (hover, focus or keyboard in the list) and shown as "Order paused · N updates · Re-sort". A "Pause live updates" control (WCAG 2.2 SC 2.2.2) freezes the screen; resume applies everything received meanwhile, so the screen jumps to the current state. Battery is shown as a bar with the critical threshold marked, plus the number.
+- Live behavior: values update in place; ordering changes are held while the user interacts (hover, focus or keyboard in the list) and shown as "Order paused · N updates · Re-sort". A "Pause live updates" control (WCAG 2.2 SC 2.2.2) freezes the screen; resume applies everything received meanwhile, so the screen jumps to the current state. Battery is shown as a bar with the critical threshold marked, plus the number.
 - Keyboard: `j`/`k` move, `Enter` opens, `g` toggles grid, ⌘K opens the command palette.
 
 ### Robot detail (`/robots/[robotId]`)
@@ -114,7 +114,7 @@ Attention-first single column, bottom navigation. Table becomes a list of robot 
 
 ### Model (vendor neutral)
 
-`Robot`: `id`, `displayName`, `vendor`, `model`, `serialNumber`, `protocol` (`vda5050` or `massrobotics`), `siteId`, `zone`, `status`, `attention` (reasons, or none), `battery` (`percent`, `charging`, `rangeMeters?`), `position` (`x`, `y`, `headingRad`, `mapId`), `speedMps`, `operatingMode`, `currentTask?` (`id`, `progress`), `errors` (normalised level and code), `lastReportAt`, `connection` (`online`, `offline`, `broken`).
+`Robot`: `id`, `displayName`, `vendor`, `model`, `serialNumber`, `protocol` (`vda5050` or `massrobotics`), `siteId`, `zone`, `status`, `attention` (reasons, or none), `battery` (`percent`, `charging`, `rangeMeters?`), `position` (`x`, `y`, `headingRad`, `mapId`), `speedMps`, `operatingMode`, `currentTask?` (`id`, `progress`), `errors` (normalized level and code), `lastReportAt`, `connection` (`online`, `offline`, `broken`).
 
 `Site`: `id`, `name`, `maps` (id, name, floor outline for the map view).
 
@@ -125,7 +125,7 @@ Status is one of `working`, `charging`, `idle`, `attention`, `offline`, in this 
 1. `offline` when the connection is `broken` or `offline`, or no report for longer than `staleAfter` (default 3 × the expected report interval).
 2. `attention` when any attention reason applies:
    - `battery-critical`: battery below the critical threshold (default 15%) and not charging
-   - `error-reported`: an error at level URGENT, CRITICAL or FATAL (VDA 5050) or the equivalent normalised level
+   - `error-reported`: an error at level URGENT, CRITICAL or FATAL (VDA 5050) or the equivalent normalized level
    - `emergency-stop`: an active emergency stop
    - `stuck`: has a task, not moving, for longer than the stuck threshold (default 2 min)
 3. `charging` when charging.
