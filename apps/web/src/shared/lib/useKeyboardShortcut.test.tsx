@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKeyboardShortcut } from './useKeyboardShortcut';
 
@@ -30,5 +30,20 @@ describe('useKeyboardShortcut', () => {
     await userEvent.keyboard('{Meta>}k{/Meta}');
     await userEvent.keyboard('k');
     expect(onKey).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores a plain key while focus is inside an open dialog', async () => {
+    const onKey = vi.fn();
+    render(
+      <>
+        <Probe onKey={onKey} />
+        <div role="dialog" aria-label="Palette">
+          <button type="button">Item</button>
+        </div>
+      </>,
+    );
+    screen.getByRole('button', { name: 'Item' }).focus();
+    await userEvent.keyboard('g');
+    expect(onKey).not.toHaveBeenCalled();
   });
 });

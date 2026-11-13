@@ -1,5 +1,6 @@
-// Native replaceState updates the URL and Next's useSearchParams without a router navigation. The state argument stays
-// null: Next skips its sync when it sees its own history state.
+// Native replaceState updates the URL without a router navigation; Next.js patches replaceState and syncs
+// useSearchParams. The state argument stays null, because a state object carrying Next's own internal marker is
+// treated as Next's own call and not synced.
 export function replaceSearchParams(ownedKeys: readonly string[], params: URLSearchParams): void {
   const next = new URLSearchParams(window.location.search);
   for (const key of ownedKeys) next.delete(key);
