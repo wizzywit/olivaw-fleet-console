@@ -1,17 +1,20 @@
 'use client';
 
-import type { RobotStatus, StatusCounts } from '@olivaw/contracts';
+import type { StatusCounts } from '@olivaw/contracts';
+import { robotStatusLabel, type RobotStatus } from '@/entities/robot';
 import { formatCount } from '@/shared/lib';
 import { ToggleChipGroup, type ToggleChip } from '@/shared/ui';
 import { useFleetFilter } from '../../use-cases/useFleetFilter';
 
+const statusChip = (id: RobotStatus) => ({ id, label: robotStatusLabel(id) });
+
 const chips: { id: RobotStatus | 'all'; label: string; tone?: 'attention' }[] = [
   { id: 'all', label: 'All' },
-  { id: 'attention', label: 'Needs attention', tone: 'attention' },
-  { id: 'offline', label: 'Offline' },
-  { id: 'working', label: 'Working' },
-  { id: 'charging', label: 'Charging' },
-  { id: 'idle', label: 'Idle' },
+  { ...statusChip('attention'), tone: 'attention' },
+  statusChip('offline'),
+  statusChip('working'),
+  statusChip('charging'),
+  statusChip('idle'),
 ];
 
 export function StatusFilterChips({ counts, total }: { counts: StatusCounts; total: number }) {

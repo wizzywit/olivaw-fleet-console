@@ -3,7 +3,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import Link from 'next/link';
 import { useRef, useState, type KeyboardEvent } from 'react';
-import { RobotStatusBadge } from '@/entities/robot';
+import { RobotStatusBadge, robotStatusLabel } from '@/entities/robot';
 import { formatRelativeTime } from '@/shared/lib';
 import { BatteryMeter, KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
@@ -33,6 +33,11 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
   const paddingTop = items[0]?.start ?? 0;
   const paddingBottom = virtualizer.getTotalSize() - (items.at(-1)?.end ?? 0);
   const active = Math.min(activeIndex, rows.length - 1);
+  const activeRow = rows[active];
+  const announcement =
+    hasFocus && activeRow !== undefined
+      ? `Row ${String(active + 1)} of ${String(rows.length)}: ${activeRow.id}, ${robotStatusLabel(activeRow.status)}, battery ${String(activeRow.batteryPercent)}%`
+      : '';
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const step = { j: 1, ArrowDown: 1, k: -1, ArrowUp: -1 }[event.key];
@@ -41,9 +46,8 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
       const next = Math.max(0, Math.min(rows.length - 1, active + step));
       setActiveIndex(next);
       virtualizer.scrollToIndex(next);
-    } else if (event.key === 'Enter') {
-      const row = rows[active];
-      if (row !== undefined) onOpen(row.href);
+    } else if (event.key === 'Enter' && activeRow !== undefined) {
+      onOpen(activeRow.href);
     }
   };
 
@@ -81,9 +85,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
             <tr aria-rowindex={1}>
               <th scope="col">Robot</th>
               <th scope="col">Site</th>
-              <th scope="col" aria-sort="descending">
-                Status
-              </th>
+              <th scope="col">Status</th>
               <th scope="col">Battery</th>
               <th scope="col" className={styles.right}>
                 Last report
@@ -138,6 +140,11 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
           </tbody>
         </table>
       </div>
+      <VisuallyHidden>
+        <span role="status" data-testid="robot-table-announcement">
+          {announcement}
+        </span>
+      </VisuallyHidden>
       <p id="robot-table-keys" className={styles.keys}>
         <KeyHint keys={['j', 'k']} /> move · <KeyHint keys={['Enter']} /> open
       </p>

@@ -75,6 +75,20 @@ describe('fleet overview', () => {
     expect(within(robotRows()[0] ?? document.body).getByRole('rowheader')).toHaveTextContent('CLN-0142');
   });
 
+  it('announces the active row to screen readers while moving with the keyboard', async () => {
+    renderWithProviders(<FleetOverviewPage />);
+    const region = await screen.findByRole('region', { name: 'Robots, sorted by urgency' });
+    await userEvent.click(region);
+    expect(screen.getByTestId('robot-table-announcement')).toHaveTextContent(
+      'Row 1 of 2: DLV-0087, Needs attention, battery 12%',
+    );
+    await userEvent.keyboard('j');
+    expect(screen.getByTestId('robot-table-announcement')).toHaveTextContent(
+      'Row 2 of 2: CLN-0142, Working, battery 78%',
+    );
+    expect(screen.getByRole('columnheader', { name: 'Status' })).not.toHaveAttribute('aria-sort');
+  });
+
   it('explains an empty result and clears the filters', async () => {
     navigation.search = new URLSearchParams('q=nothing-matches-this');
     renderWithProviders(<FleetOverviewPage />);
