@@ -16,6 +16,7 @@ import { useHoldWhileWorking } from '../../use-cases/useHoldWhileWorking';
 import { useRobotGrid } from '../../use-cases/useRobotGrid';
 import { drawGrid, readGridColors } from './drawGrid';
 import styles from './RobotGrid.module.css';
+import { tooltipPlacement, type TooltipPlacement } from './tooltipPlacement';
 
 export interface RobotGridProps {
   rows: RobotRowView[];
@@ -70,7 +71,7 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps)
   const grid = useRobotGrid(rows, sites, width);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [lastIndex, setLastIndex] = useState(0);
-  const [hovered, setHovered] = useState<{ index: number; x: number; y: number } | null>(null);
+  const [hovered, setHovered] = useState<{ index: number; placement: TooltipPlacement } | null>(null);
   const { hasFocus, holdProps } = useHoldWhileWorking(onHeldChange, () => {
     setHovered(null);
   });
@@ -151,13 +152,23 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps)
             onMouseMove={(event) => {
               const { x, y } = pointAt(event);
               const index = grid.hit(x, y);
-              setHovered(index === null ? null : { index, x, y });
+              const scroll = scrollRef.current;
+              const view = {
+                width: grid.layout.width,
+                top: scroll?.scrollTop ?? 0,
+                height: scroll?.clientHeight ?? Number.POSITIVE_INFINITY,
+              };
+              setHovered(index === null ? null : { index, placement: tooltipPlacement({ x, y }, view) });
             }}
           />
           {hovered !== null && hoveredRow !== undefined && (
             <div
               className={styles.tooltip}
-              style={{ left: hovered.x + 12, top: hovered.y + 12 }}
+              style={{
+                left: hovered.placement.left,
+                top: hovered.placement.top,
+                transform: `translate(${hovered.placement.flipX ? '-100%' : '0'}, ${hovered.placement.flipY ? '-100%' : '0'})`,
+              }}
               aria-hidden="true"
             >
               {hoveredRow.id} · {robotStatusLabel(hoveredRow.status)}
