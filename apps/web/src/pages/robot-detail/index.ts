@@ -1,1 +1,1 @@
-export { RobotDetailPage as RobotDetailRoute } from './ui/RobotDetailPage/RobotDetailPage';
+export { RobotDetailRoute } from './ui/RobotDetailRoute';

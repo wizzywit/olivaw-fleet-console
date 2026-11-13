@@ -15,6 +15,22 @@
   border-collapse: collapse;
 }
 
+.row {
+  border-top: 1px solid var(--row-line);
+}
+
+.row th,
+.row td {
+  padding: 0 var(--space-5);
+  text-align: left;
+  font-weight: 400;
+}
+
+.row[data-active='true'] {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
 .table thead th {
   position: sticky;
   top: 0;
@@ -30,22 +46,6 @@
 .table thead th[aria-sort] {
   color: var(--text);
   font-weight: 600;
-}
-
-.row {
-  border-top: 1px solid var(--row-line);
-}
-
-.row th,
-.row td {
-  padding: 0 var(--space-5);
-  text-align: left;
-  font-weight: 400;
-}
-
-.row[data-active='true'] {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: -2px;
 }
 
 .robot {
