@@ -93,14 +93,14 @@ Does not need:
 
 ## Traceability
 
-| Need                  | Spec                             | Build tier                                                   |
-| --------------------- | -------------------------------- | ------------------------------------------------------ |
-| Q1 summary            | §5 Fleet overview, §7 aggregates | Tier 1|
-| Q2 attention          | §6 status rules                  | Tier 1|
-| Q3 freshness          | §5 States, §6, §7                | Tier 1|
-| Q4 detail             | §5 Robot detail                  | Tier 1 Task 16; tier 3 history                         |
-| Q5 search and filters | §5                               | Tier 1 Task 13; tier 2 command palette                 |
-| Q6 actions            | §5, §2 non-goals                 | Tier 1 Task 16                                         |
-| Q7 vendor neutral     | §6 adapters                      | Tier 1; tier 3 MassRobotics                 |
-| Scale                 | §7 scale notes, §8 performance   | Tier 1; tier 2 grid and 10k profile |
-| Accessibility, themes | §3, design system                | Tier 1; tier 3 Playwright + axe            |
+| Need                  | Spec                             | Build tier                             |
+| --------------------- | -------------------------------- | -------------------------------------- |
+| Q1 summary            | §5 Fleet overview, §7 aggregates | Tier 1                                 |
+| Q2 attention          | §6 status rules                  | Tier 1                                 |
+| Q3 freshness          | §5 States, §6, §7                | Tier 1                                 |
+| Q4 detail             | §5 Robot detail                  | Tier 1 Task 16; tier 3 history         |
+| Q5 search and filters | §5                               | Tier 1 Task 13; tier 2 command palette |
+| Q6 actions            | §5, §2 non-goals                 | Tier 1 Task 16                         |
+| Q7 vendor neutral     | §6 adapters                      | Tier 1; tier 3 MassRobotics            |
+| Scale                 | §7 scale notes, §8 performance   | Tier 1; tier 2 grid and 10k profile    |
+| Accessibility, themes | §3, design system                | Tier 1; tier 3 Playwright + axe        |
