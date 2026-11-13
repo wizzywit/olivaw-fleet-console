@@ -28,11 +28,18 @@ export async function httpGet<T>(
   return parse(await fetch(`${apiBaseUrl()}${path}`, init), schema);
 }
 
-export async function httpPost<T>(path: string, body: unknown, schema: z.ZodType<T>): Promise<T> {
-  const response = await fetch(`${apiBaseUrl()}${path}`, {
+const postJson = (path: string, body: unknown) =>
+  fetch(`${apiBaseUrl()}${path}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
   });
-  return parse(response, schema);
+
+export async function httpPost<T>(path: string, body: unknown, schema: z.ZodType<T>): Promise<T> {
+  return parse(await postJson(path, body), schema);
+}
+
+export async function httpPostNoContent(path: string, body: unknown): Promise<void> {
+  const response = await postJson(path, body);
+  if (!response.ok) throw new HttpError(response.status, 'status');
 }
