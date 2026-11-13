@@ -5,6 +5,7 @@ import type {
   RobotPatchDto,
   SiteDto,
   SiteMapDto,
+  StatusCounts,
 } from '@olivaw/contracts';
 import type { Robot } from '@/entities/robot/@x/fleet';
 
@@ -14,6 +15,7 @@ export type FleetAggregates = FleetAggregatesDto;
 export type AttentionGroup = AttentionGroupDto;
 export type Site = SiteDto;
 export type SiteMap = SiteMapDto;
+export type { StatusCounts };
 
 export type LiveStatus = 'connecting' | 'live' | 'reconnecting' | 'offline';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import type { StatusCounts } from '@olivaw/contracts';
+import type { StatusCounts } from '@/entities/fleet';
 import { robotStatusLabel, type RobotStatus } from '@/entities/robot';
 import { formatCount } from '@/shared/lib';
 import { ToggleChipGroup, type ToggleChip } from '@/shared/ui';

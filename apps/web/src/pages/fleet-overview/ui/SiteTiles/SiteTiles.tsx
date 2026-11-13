@@ -1,4 +1,4 @@
-import type { RobotStatus } from '@olivaw/contracts';
+import type { RobotStatus } from '@/entities/robot';
 import { StatTile } from '@/shared/ui';
 import type { SiteTileView } from '../../use-cases/useFleetOverview';
 import styles from './SiteTiles.module.css';

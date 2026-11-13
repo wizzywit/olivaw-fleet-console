@@ -148,6 +148,31 @@ export default tseslint.config(
       ],
     },
   },
+  // The wire contract stays at the edges: adapters translate it, types and entity services may build on it, and
+  // everything else uses the domain types the entities export.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: [
+      'src/**/adapter/**',
+      'src/**/types/**',
+      'src/entities/*/services/**',
+      'src/**/*.test.{ts,tsx}',
+      'src/test/**',
+    ],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@olivaw/contracts',
+              message: 'Use the domain types and services exported by the entities; contracts belong in adapters.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   { files: ['**/*.{js,mjs,cjs}'], ...tseslint.configs.disableTypeChecked },
   prettier,
 );

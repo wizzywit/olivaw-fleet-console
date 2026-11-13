@@ -1,8 +1,7 @@
 'use client';
 
-import type { AttentionReason } from '@olivaw/contracts';
 import Link from 'next/link';
-import { RobotStatusBadge } from '@/entities/robot';
+import { RobotStatusBadge, type AttentionReason } from '@/entities/robot';
 import { AppHeader } from '@/widgets/app-header';
 import { LiveConnectionBanner } from '@/widgets/live-connection-banner';
 import { Banner, BatteryMeter, Button, EmptyState, Skeleton } from '@/shared/ui';

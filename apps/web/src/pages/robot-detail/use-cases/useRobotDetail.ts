@@ -1,6 +1,5 @@
 'use client';
 
-import type { AttentionReason, ErrorLevel, SiteMapDto } from '@olivaw/contracts';
 import {
   isLastKnownValue,
   isLive,
@@ -9,12 +8,13 @@ import {
   useFleetRobot,
   useFleetSites,
   useLiveStatus,
+  type SiteMap,
 } from '@/entities/fleet';
-import { isBatteryCritical, type RobotStatus } from '@/entities/robot';
+import { isBatteryCritical, type AttentionReason, type RobotStatus } from '@/entities/robot';
 import { formatPercent, formatRelativeTime, useNow } from '@/shared/lib';
 import { useRobotCommandRepository, useRobotDetailRepository } from '../repository/robotDetailRepository';
 import { toMapPercent } from '../services/mapPosition';
-import type { RobotCommandType } from '../types/robotDetail';
+import type { ErrorLevel, RobotCommandType } from '../types/robotDetail';
 
 const protocolLabels = { vda5050: 'VDA 5050 3.0', massrobotics: 'MassRobotics' } as const;
 const errorLevelLabels: Record<ErrorLevel, string> = {
@@ -33,7 +33,7 @@ export interface RobotAlertView {
 
 export interface LocationMapView {
   name: string;
-  zones: (SiteMapDto['zones'][number] & {
+  zones: (SiteMap['zones'][number] & {
     left: number;
     top: number;
     widthPercent: number;

@@ -1,6 +1,5 @@
 'use client';
 
-import type { StatusCounts } from '@olivaw/contracts';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -13,6 +12,7 @@ import {
   useFleetRobots,
   useFleetSites,
   useLiveStatus,
+  type StatusCounts,
 } from '@/entities/fleet';
 import {
   compareByUrgency,

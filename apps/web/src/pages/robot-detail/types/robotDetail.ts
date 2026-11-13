@@ -1,6 +1,6 @@
 import type { ErrorLevel, RobotCommandType, RobotProtocol } from '@olivaw/contracts';
 
-export type { RobotCommandType };
+export type { ErrorLevel, RobotCommandType };
 
 export interface RobotDetailExtras {
   serialNumber: string;

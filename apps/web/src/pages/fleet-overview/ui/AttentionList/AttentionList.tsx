@@ -1,8 +1,8 @@
 'use client';
 
-import type { AttentionReason } from '@olivaw/contracts';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import type { AttentionReason } from '@/entities/robot';
 import { PriorityTag } from '@/shared/ui';
 import type { AttentionGroupView } from '../../use-cases/useFleetOverview';
 import styles from './AttentionList.module.css';
