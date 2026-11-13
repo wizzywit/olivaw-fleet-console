@@ -37,6 +37,12 @@
   background: var(--attention-bg);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .group[data-highlighted='true'] {
+    background: transparent;
+  }
+}
+
 .summary {
   display: flex;
   flex-wrap: wrap;

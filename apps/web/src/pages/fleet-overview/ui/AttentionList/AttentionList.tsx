@@ -16,22 +16,33 @@ const copy: Record<AttentionReason, { title: string; action: string }> = {
 
 const highlightMs = 2000;
 
-// Groups that just grew get a short highlight so a new problem is noticed without anything moving.
-function useGrowthHighlight(groups: AttentionGroupView[]): Set<AttentionReason> {
-  const previous = useRef(new Map<AttentionReason, number>());
-  const [highlighted, setHighlighted] = useState<Set<AttentionReason>>(new Set());
+// Groups that just grew get a short highlight so a new problem is noticed without anything moving. The effect is keyed
+// on the counts, not the groups array, because the page re-renders every second with a new array.
+function useGrowthHighlight(groups: AttentionGroupView[]): Set<string> {
+  const countsKey = groups.map((group) => `${group.reason}:${String(group.count)}`).join('|');
+  const previous = useRef(new Map<string, number>());
+  const [highlighted, setHighlighted] = useState<Set<string>>(new Set());
   useEffect(() => {
-    const grown = groups.filter((group) => group.count > (previous.current.get(group.reason) ?? group.count));
-    previous.current = new Map(groups.map((group) => [group.reason, group.count]));
+    const counts = new Map(
+      countsKey
+        .split('|')
+        .filter(Boolean)
+        .map((entry) => {
+          const [reason = '', count = '0'] = entry.split(':');
+          return [reason, Number(count)] as const;
+        }),
+    );
+    const grown = [...counts].filter(([reason, count]) => count > (previous.current.get(reason) ?? count));
+    previous.current = counts;
     if (grown.length === 0) return;
-    setHighlighted(new Set(grown.map((group) => group.reason)));
+    setHighlighted(new Set(grown.map(([reason]) => reason)));
     const timer = setTimeout(() => {
       setHighlighted(new Set());
     }, highlightMs);
     return () => {
       clearTimeout(timer);
     };
-  }, [groups]);
+  }, [countsKey]);
   return highlighted;
 }
 
