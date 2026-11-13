@@ -1,0 +1,1 @@
+This folder stays empty on purpose. Next.js looks for a Pages Router in `pages/` or `src/pages/`; an existing root `pages/` makes it ignore `src/pages`, which is the Feature-Sliced Design pages layer. Routes live in the root `app/` folder and re-export from `src/pages`. See ADR 0003.

@@ -1,0 +1,101 @@
+/* Generated from design/tokens.json by scripts/build-tokens.ts. Do not edit by hand. */
+
+:root,
+[data-theme='light'] {
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --surface-raised: #fafaf8;
+  --surface-sunken: #ecece8;
+  --border: #e4e4e0;
+  --border-strong: #868b92;
+  --row-line: #f2f2ee;
+  --text: #17181a;
+  --text-secondary: #3f434a;
+  --text-muted: #5e636b;
+  --accent: #4338ca;
+  --accent-text: #312e81;
+  --accent-soft: #ececfb;
+  --on-accent: #ffffff;
+  --inverse-bg: #17181a;
+  --inverse-fg: #ffffff;
+  --focus-ring: var(--accent);
+  --live: #15803d;
+  --working-fg: #1d4ed8;
+  --working-bg: #e7f0fe;
+  --working-solid: #3b6fe0;
+  --charging-fg: #5b21b6;
+  --charging-bg: #eeebfd;
+  --charging-solid: #8b6fe8;
+  --idle-fg: #3f434a;
+  --idle-bg: #f0f0ec;
+  --idle-solid: #868b92;
+  --attention-fg: #9a3412;
+  --attention-bg: #fef3e2;
+  --attention-solid: #ea580c;
+  --attention-border: #e9b26b;
+  --offline-fg: #3f434a;
+  --offline-bg: #e8e8e5;
+  --offline-solid: #5e636b;
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-overlay: 0 12px 32px rgba(23, 24, 26, 0.18);
+}
+
+[data-theme='dark'] {
+  --bg: #0e1013;
+  --surface: #16191d;
+  --surface-raised: #1b1f24;
+  --surface-sunken: #22262c;
+  --border: #2a2f36;
+  --border-strong: #6b727c;
+  --row-line: #20242a;
+  --text: #eceef1;
+  --text-secondary: #c3c8cf;
+  --text-muted: #98a0aa;
+  --accent: #8b93ff;
+  --accent-text: #c7cbff;
+  --accent-soft: #23264a;
+  --on-accent: #0e1013;
+  --inverse-bg: #eceef1;
+  --inverse-fg: #0e1013;
+  --focus-ring: var(--accent);
+  --live: #4ade80;
+  --working-fg: #8db4ff;
+  --working-bg: #17264a;
+  --working-solid: #4f86f7;
+  --charging-fg: #c4b5fd;
+  --charging-bg: #2a2150;
+  --charging-solid: #9a7bf5;
+  --idle-fg: #c3c8cf;
+  --idle-bg: #262a30;
+  --idle-solid: #767e89;
+  --attention-fg: #fdba74;
+  --attention-bg: #3a2312;
+  --attention-solid: #f97316;
+  --attention-border: #7c4a1e;
+  --offline-fg: #c3c8cf;
+  --offline-bg: #24272c;
+  --offline-solid: #9aa2ad;
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-xs: 3px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+  --target-min: 44px;
+  --control-md: 40px;
+  --control-sm: 36px;
+  --grid-cell: 12px;
+  --font-sans: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
