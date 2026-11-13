@@ -18,7 +18,7 @@ Assumptions I made (and would confirm with Olivaw):
 | #   | The manager asks                                           | So the system needs                                                                                                                                                                                                    | Built as                                                                                                                      |
 | --- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Q1  | "Is everything OK right now?"                              | One glance summary: counts by status, per site                                                                                                                                                                         | Site tiles and status counts on the overview                                                                                  |
-| Q2  | "What needs me, and what first?"                           | Problems detected for them, ranked by priority, each with the reason and the action expected; grouped so 30 low batteries are one line, not 30, with new arrivals marked                                               | "Needs your attention" groups with priority, required action and "new" markers; urgency-sorted table                          |
+| Q2  | "What needs me, and what first?"                           | Problems detected for them, ranked by priority, each with the reason and the action expected; grouped so 30 low batteries are one line, not 30, with new arrivals marked                                               | "Needs your attention" groups with priority, required action and shared unseen counts; urgency-sorted table                   |
 | Q3  | "Can I trust what I'm seeing?"                             | Every robot shows when it was last heard from; stale data is marked by exception and kept as last known, never shown as current; the console says when its own link is down; silent robots become offline on their own | Last-report column, stale badge variant, live status in the header, connection-lost state, server stale sweep, MQTT last will |
 | Q4  | "What is wrong with this robot, where is it, how bad?"     | One robot's status, battery, mode, task, position on its site map, active errors, what it actually reported                                                                                                            | Robot detail page                                                                                                             |
 | Q5  | "Find robot X / all low-battery delivery robots at site Y" | Search and filters that are fast and shareable                                                                                                                                                                         | Search with filter syntax, status chips, site filter, all in the URL                                                          |
@@ -114,15 +114,15 @@ Checked on 2026-11-13; quotes are short excerpts.
 
 ## Traceability
 
-| Need                  | Spec                             | Build tier                                              |
-| --------------------- | -------------------------------- | ------------------------------------------------------- |
-| Q1 summary            | §5 Fleet overview, §7 aggregates | Tier 1                                                  |
-| Q2 attention          | §6 status rules                  | Tier 1                                                  |
-| Q3 freshness          | §5 States, §6, §7                | Tier 1                                                  |
-| Q4 detail             | §5 Robot detail                  | Tier 1; tier 3 history                                  |
-| Q5 search and filters | §5                               | Tier 1; tier 2 command palette                          |
-| Q6 actions            | §5, §2 non-goals                 | Tier 1                                                  |
-| Q7 vendor neutral     | §6 adapters                      | Tier 1; tier 3 MassRobotics                             |
-| Scale                 | §7 scale notes, §8 performance   | Tier 1; tier 2 grid and 10k profile                     |
-| Accessibility, themes | §3, design system                | Tier 1; tier 3 Playwright + axe                         |
-| Alerting (deferred)   | §2 non-goals                     | Tier 2 acknowledgement; notifications beyond this build |
+| Need                  | Spec                             | Build tier                                                           |
+| --------------------- | -------------------------------- | -------------------------------------------------------------------- |
+| Q1 summary            | §5 Fleet overview, §7 aggregates | Tier 1                                                               |
+| Q2 attention          | §6 status rules                  | Tier 1                                                               |
+| Q3 freshness          | §5 States, §6, §7                | Tier 1                                                               |
+| Q4 detail             | §5 Robot detail                  | Tier 1; tier 3 history                                               |
+| Q5 search and filters | §5                               | Tier 1; tier 2 command palette                                       |
+| Q6 actions            | §5, §2 non-goals                 | Tier 1                                                               |
+| Q7 vendor neutral     | §6 adapters                      | Tier 1; tier 3 MassRobotics                                          |
+| Scale                 | §7 scale notes, §8 performance   | Tier 1; tier 2 grid and 10k profile                                  |
+| Accessibility, themes | §3, design system                | Tier 1; tier 3 Playwright + axe                                      |
+| Alerting (deferred)   | §2 non-goals                     | Tier 2 shared seen marks (ADR 0016); notifications beyond this build |
