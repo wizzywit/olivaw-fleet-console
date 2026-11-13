@@ -1,5 +1,6 @@
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { FleetSnapshotHydration } from '@/entities/fleet';
 import { ThemeBootstrapScript } from '@/features/toggle-theme';
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -20,7 +21,9 @@ export function RootLayout({ children }: { children: ReactNode }) {
         <ThemeBootstrapScript />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <FleetSnapshotHydration>{children}</FleetSnapshotHydration>
+        </Providers>
       </body>
     </html>
   );

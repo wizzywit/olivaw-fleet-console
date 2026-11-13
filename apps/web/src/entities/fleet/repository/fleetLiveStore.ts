@@ -25,6 +25,9 @@ export interface FleetLiveState {
   setLive: (status: LiveStatus, retryInMs: number | null) => void;
   pause: () => void;
   resume: () => void;
+  retryLive: () => void;
+  setRetryLive: (retry: () => void) => void;
+  reset: () => void;
 }
 
 export interface FleetLiveStoreDeps {
@@ -38,6 +41,18 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
   let frameRequested = false;
 
   return createStore<FleetLiveState>()((set, get) => {
+    const initialState = () => ({
+      robots: new Map<string, Robot>(),
+      aggregates: null,
+      sites: [],
+      config: null,
+      sequence: null,
+      live: { status: 'connecting' as LiveStatus, retryInMs: null, lastPatchAt: null },
+      isPaused: false,
+      pendingCount: 0,
+      retryLive: () => undefined,
+    });
+
     const requestFrame = () => {
       if (frameRequested || get().isPaused || isHidden()) return;
       frameRequested = true;
@@ -48,14 +63,7 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
     };
 
     return {
-      robots: new Map(),
-      aggregates: null,
-      sites: [],
-      config: null,
-      sequence: null,
-      live: { status: 'connecting', retryInMs: null, lastPatchAt: null },
-      isPaused: false,
-      pendingCount: 0,
+      ...initialState(),
 
       seed(snapshot) {
         pending = pending.filter((patch) => patch.sequence > snapshot.sequence);
@@ -113,8 +121,30 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
         set({ isPaused: false });
         get().flush();
       },
+
+      setRetryLive(retry) {
+        set({ retryLive: retry });
+      },
+
+      reset() {
+        pending = [];
+        frameRequested = false;
+        set(initialState());
+      },
     };
   });
 }
 
 export type FleetLiveStore = ReturnType<typeof createFleetLiveStore>;
+
+const browserDeps: FleetLiveStoreDeps = {
+  schedule: (run) => {
+    requestAnimationFrame(run);
+  },
+  isHidden: () => typeof document !== 'undefined' && document.visibilityState === 'hidden',
+  now: () => new Date(),
+};
+
+// One store for the app, imported directly. It is only written on the client (seeding happens in an effect),
+// so the server never shares fleet state between requests.
+export const fleetLiveStore = createFleetLiveStore(browserDeps);

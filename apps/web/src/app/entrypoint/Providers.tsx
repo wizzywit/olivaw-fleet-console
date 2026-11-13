@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
-import { FleetStoreProvider } from '@/entities/fleet';
+import { FleetLiveConnection } from '@/entities/fleet';
 import { ThemeProvider } from '@/features/toggle-theme';
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -10,7 +10,8 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <FleetStoreProvider>{children}</FleetStoreProvider>
+        <FleetLiveConnection />
+        {children}
       </ThemeProvider>
     </QueryClientProvider>
   );

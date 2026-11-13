@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
-import { FleetStoreProvider } from '@/entities/fleet';
+import { FleetLiveConnection } from '@/entities/fleet';
 import { ThemeProvider } from '@/features/toggle-theme';
 
 export function renderWithProviders(ui: ReactElement) {
@@ -9,7 +9,8 @@ export function renderWithProviders(ui: ReactElement) {
   return render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <FleetStoreProvider>{ui}</FleetStoreProvider>
+        <FleetLiveConnection />
+        {ui}
       </ThemeProvider>
     </QueryClientProvider>,
   );

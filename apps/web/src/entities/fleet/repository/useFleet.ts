@@ -1,24 +1,14 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useContext } from 'react';
 import { useStore } from 'zustand';
 import type { Robot } from '@/entities/robot/@x/fleet';
-import { FleetStoreContext, type FleetStoreContextValue } from './FleetStoreProvider';
-import type { FleetLiveState } from './fleetLiveStore';
+import { fleetLiveStore, type FleetLiveState } from './fleetLiveStore';
 import { fleetSnapshotQuery } from './fleetSnapshotQuery';
 
-function useFleetContext(): FleetStoreContextValue {
-  const context = useContext(FleetStoreContext);
-  if (context === null) throw new Error('Fleet hooks must be used inside FleetStoreProvider');
-  return context;
-}
-
-const useFleetState = <T>(selector: (state: FleetLiveState) => T): T =>
-  useStore(useFleetContext().store, selector);
+const useFleetState = <T>(selector: (state: FleetLiveState) => T): T => useStore(fleetLiveStore, selector);
 
 export function useFleetRepository() {
-  useFleetContext();
   const query = useQuery(fleetSnapshotQuery());
   return {
     isLoading: query.isPending,
@@ -36,20 +26,12 @@ export const useFleetAggregates = () => useFleetState((state) => state.aggregate
 export const useFleetSites = () => useFleetState((state) => state.sites);
 export const useFleetConfig = () => useFleetState((state) => state.config);
 export const useLiveStatus = () => useFleetState((state) => state.live);
-export const useRetryLive = (): (() => void) => useFleetContext().retryLive;
+export const useRetryLive = (): (() => void) => useFleetState((state) => state.retryLive);
 
 export function useLivePause() {
   const isPaused = useFleetState((state) => state.isPaused);
   const pendingCount = useFleetState((state) => state.pendingCount);
-  const { store } = useFleetContext();
-  return {
-    isPaused,
-    pendingCount,
-    pause: () => {
-      store.getState().pause();
-    },
-    resume: () => {
-      store.getState().resume();
-    },
-  };
+  const pause = useFleetState((state) => state.pause);
+  const resume = useFleetState((state) => state.resume);
+  return { isPaused, pendingCount, pause, resume };
 }
