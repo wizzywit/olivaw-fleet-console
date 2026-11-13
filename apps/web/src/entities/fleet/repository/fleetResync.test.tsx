@@ -31,7 +31,7 @@ describe('fleet live connection', () => {
       }),
       live.addEventListener('connection', ({ client }) => {
         client.addEventListener('message', (event) => {
-          hellos.push(JSON.parse(String(event.data)));
+          if (typeof event.data === 'string') hellos.push(JSON.parse(event.data));
           if (snapshotRequests === 1) client.send(JSON.stringify({ type: 'resync' }));
         });
       }),
