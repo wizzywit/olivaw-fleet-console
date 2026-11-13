@@ -52,6 +52,7 @@ export const fleetConfigDtoSchema = z.object({
 });
 
 export const fleetSnapshotDtoSchema = z.object({
+  instanceId: z.string().min(1),
   sequence: z.number().int().nonnegative(),
   generatedAt: z.iso.datetime(),
   config: fleetConfigDtoSchema,

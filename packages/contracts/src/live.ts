@@ -13,11 +13,14 @@ export const livePatchSchema = z.object({
 export const liveServerMessageSchema = z.discriminatedUnion('type', [
   livePatchSchema,
   z.object({ type: z.literal('resync') }),
+  z.object({ type: z.literal('heartbeat') }),
 ]);
 
 export const liveClientMessageSchema = z.object({
   type: z.literal('hello'),
   lastSequence: z.number().int().nonnegative().nullable(),
+  // Sequences restart with every ingest process; the instance id tells the server which run they belong to.
+  instanceId: z.string().nullable(),
 });
 
 export type LivePatch = z.infer<typeof livePatchSchema>;

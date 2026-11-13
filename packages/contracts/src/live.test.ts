@@ -42,11 +42,15 @@ describe('live messages', () => {
   });
 
   it('accepts a resync instruction', () => {
+    expect(liveServerMessageSchema.parse({ type: 'heartbeat' })).toEqual({ type: 'heartbeat' });
     expect(liveServerMessageSchema.parse({ type: 'resync' })).toEqual({ type: 'resync' });
   });
 
   it('accepts a hello with or without a last sequence', () => {
-    expect(liveClientMessageSchema.parse({ type: 'hello', lastSequence: null }).lastSequence).toBeNull();
-    expect(liveClientMessageSchema.parse({ type: 'hello', lastSequence: 12 }).lastSequence).toBe(12);
+    expect(
+      liveClientMessageSchema.parse({ type: 'hello', lastSequence: 3, instanceId: 'a' }).instanceId,
+    ).toBe('a');
+    expect(liveClientMessageSchema.parse({ type: 'hello', lastSequence: null, instanceId: null }).lastSequence).toBeNull();
+    expect(liveClientMessageSchema.parse({ type: 'hello', lastSequence: 12, instanceId: 'x' }).lastSequence).toBe(12);
   });
 });
