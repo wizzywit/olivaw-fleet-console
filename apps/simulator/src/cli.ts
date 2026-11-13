@@ -1,4 +1,5 @@
 import { parseArgs } from 'node:util';
+import { waitForBroker } from './brokerReady';
 import { createFleet } from './fleet';
 import { runVdaFleet } from './vdaPublisher';
 
@@ -26,6 +27,7 @@ const seed = positiveInteger('seed', values.seed);
 const robots = createFleet(positiveInteger('robots', values.robots), seed);
 log(`simulating ${String(robots.length)} robots (seed ${values.seed})`);
 
+await waitForBroker(values.broker, { log });
 const fleet = await runVdaFleet(robots, {
   brokerUrl: values.broker,
   intervalMs: positiveInteger('interval', values.interval),
