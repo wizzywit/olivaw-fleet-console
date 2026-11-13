@@ -1,0 +1,15 @@
+{
+  "headerId": 1,
+  "timestamp": "2026-11-13T10:00:00.000Z",
+  "version": "3.0.0",
+  "manufacturer": "Nordbot",
+  "serialNumber": "CLN-0142",
+  "typeSpecification": {
+    "seriesName": "Scrubber S2",
+    "mobileRobotKinematics": "DIFF",
+    "mobileRobotClass": "CARRIER",
+    "maximumLoadMass": 0,
+    "localizationTypes": ["NATURAL"],
+    "navigationTypes": ["AUTONOMOUS"]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "headerId": 88213,
+  "timestamp": "2026-11-13T10:41:07.120Z",
+  "version": "3.0.0",
+  "manufacturer": "Kairo",
+  "serialNumber": "DLV-0087",
+  "orderId": "ord-55a1",
+  "orderUpdateId": 2,
+  "lastNodeId": "n-4",
+  "lastNodeSequenceId": 8,
+  "nodeStates": [],
+  "edgeStates": [],
+  "driving": true,
+  "actionStates": [{ "actionId": "a-1", "actionType": "drop", "actionStatus": "WAITING" }],
+  "instantActionStates": [],
+  "powerSupply": { "stateOfCharge": 12, "charging": false },
+  "operatingMode": "AUTOMATIC",
+  "errors": [
+    {
+      "errorType": "BATTERY_LOW",
+      "errorLevel": "URGENT",
+      "errorDescription": "Charge below the configured threshold"
+    }
+  ],
+  "safetyState": { "activeEmergencyStop": "NONE", "fieldViolation": false },
+  "mobileRobotPosition": { "x": 41.2, "y": 8.7, "theta": 1.57, "mapId": "isar-f4", "localized": true },
+  "velocity": { "vx": 0.6, "vy": 0 }
+}
