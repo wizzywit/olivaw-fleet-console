@@ -6,23 +6,30 @@ export interface BatteryMeterProps {
   percent: number;
   criticalPercent: number;
   charging: boolean;
+  isCritical: boolean;
   isStale?: boolean;
 }
 
-function describe(percent: number, criticalPercent: number, charging: boolean): string {
+function describe(percent: number, criticalPercent: number, charging: boolean, isCritical: boolean): string {
   if (charging) return `Battery ${percent}%, charging`;
-  if (percent < criticalPercent) return `Battery ${percent}%, below the ${criticalPercent}% threshold`;
+  if (isCritical) return `Battery ${percent}%, below the ${criticalPercent}% threshold`;
   return `Battery ${percent}%`;
 }
 
-export function BatteryMeter({ percent, criticalPercent, charging, isStale = false }: BatteryMeterProps) {
-  const isLow = !charging && percent < criticalPercent;
+// Presentational: whether the value is critical is decided upstream (by the server's rules), not here.
+export function BatteryMeter({
+  percent,
+  criticalPercent,
+  charging,
+  isCritical,
+  isStale = false,
+}: BatteryMeterProps) {
   return (
     <Meter
       className={clsx(styles.meter)}
       value={percent}
-      aria-label={describe(percent, criticalPercent, charging)}
-      data-low={isLow}
+      aria-label={describe(percent, criticalPercent, charging, isCritical)}
+      data-low={isCritical}
       data-stale={isStale}
     >
       <span className={clsx(styles.track)} aria-hidden="true">

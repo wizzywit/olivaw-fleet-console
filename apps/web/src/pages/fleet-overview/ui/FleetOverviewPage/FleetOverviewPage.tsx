@@ -41,7 +41,7 @@ export function FleetOverviewPage() {
                 <h2 id="robots-heading" className={styles.subtitle}>
                   Robots
                 </h2>
-                <StatusFilterChips counts={overview.statusCounts} />
+                <StatusFilterChips counts={overview.statusCounts} total={overview.statusTotal} />
                 {overview.pendingChanges > 0 && (
                   <div role="status" className={styles.held}>
                     Order paused while you work · {overview.pendingChanges}{' '}

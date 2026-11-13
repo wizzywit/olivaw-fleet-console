@@ -1,9 +1,5 @@
-import { robotStatuses } from '@olivaw/contracts';
-import type { RobotStatus } from '@/entities/robot';
+import { isRobotStatus } from '@/entities/robot';
 import type { FleetQuery } from '../types/fleetFilter';
-
-const isRobotStatus = (value: string): value is RobotStatus =>
-  (robotStatuses as readonly string[]).includes(value);
 
 export function parseFleetQuery(input: string): FleetQuery {
   const query: FleetQuery = { text: '', site: null, vendor: null, status: null, batteryBelow: null };

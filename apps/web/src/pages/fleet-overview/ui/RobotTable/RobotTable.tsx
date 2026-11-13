@@ -118,6 +118,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
                       percent={row.batteryPercent}
                       criticalPercent={criticalBatteryPercent}
                       charging={row.charging}
+                      isCritical={row.isBatteryCritical}
                       isStale={row.isStale}
                     />
                   </td>

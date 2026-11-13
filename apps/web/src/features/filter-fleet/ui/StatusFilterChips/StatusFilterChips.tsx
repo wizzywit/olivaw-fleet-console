@@ -14,9 +14,8 @@ const chips: { id: RobotStatus | 'all'; label: string; tone?: 'attention' }[] = 
   { id: 'idle', label: 'Idle' },
 ];
 
-export function StatusFilterChips({ counts }: { counts: StatusCounts }) {
+export function StatusFilterChips({ counts, total }: { counts: StatusCounts; total: number }) {
   const { filter, setStatus } = useFleetFilter();
-  const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
   const items: ToggleChip[] = chips.map((chip) => ({
     ...chip,
     count: formatCount(chip.id === 'all' ? total : counts[chip.id]),

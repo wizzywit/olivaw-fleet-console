@@ -1,13 +1,13 @@
 'use client';
 
-import { useLiveStatus, useRetryLive } from '@/entities/fleet';
+import { isLinkDown, useLiveStatus, useRetryLive } from '@/entities/fleet';
 import { formatClockTime, formatRelativeTime, useNow } from '@/shared/lib';
 
 export function useLiveConnectionBanner() {
   const live = useLiveStatus();
   const retry = useRetryLive();
   const now = useNow(1000);
-  const isVisible = live.status === 'reconnecting' || live.status === 'offline';
+  const isVisible = isLinkDown(live.status);
   const asOf =
     live.lastPatchAt === null
       ? 'No live updates have arrived yet.'

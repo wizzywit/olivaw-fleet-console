@@ -1,9 +1,5 @@
-import { robotStatuses } from '@olivaw/contracts';
-import type { RobotStatus } from '@/entities/robot';
+import { isRobotStatus } from '@/entities/robot';
 import type { FleetFilterParams } from '../types/fleetFilter';
-
-const isRobotStatus = (value: string | null): value is RobotStatus =>
-  value !== null && (robotStatuses as readonly string[]).includes(value);
 
 export function fromSearchParams(params: URLSearchParams): FleetFilterParams {
   const status = params.get('status');

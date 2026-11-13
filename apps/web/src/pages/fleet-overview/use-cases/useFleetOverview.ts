@@ -4,7 +4,9 @@ import type { StatusCounts } from '@olivaw/contracts';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import {
+  isLastKnownValue,
   isLive,
+  totalOf,
   useFleetAggregates,
   useFleetConfig,
   useFleetRepository,
@@ -14,6 +16,7 @@ import {
 } from '@/entities/fleet';
 import {
   compareByUrgency,
+  isBatteryCritical,
   type AttentionPriority,
   type AttentionReason,
   type Robot,
@@ -53,6 +56,7 @@ export interface RobotRowView {
   siteZone: string;
   status: RobotStatus;
   isStale: boolean;
+  isBatteryCritical: boolean;
   batteryPercent: number;
   charging: boolean;
   lastReportAt: Date;
@@ -133,7 +137,8 @@ export function useFleetOverview() {
     vendorModel: `${robot.vendor} ${robot.model}`,
     siteZone: [siteName(robot.siteId) ?? robot.siteId, robot.zone].filter(Boolean).join(' · '),
     status: robot.status,
-    isStale: isLastKnown || robot.status === 'offline',
+    isStale: isLastKnownValue(robot.status, live.status),
+    isBatteryCritical: isBatteryCritical(robot),
     batteryPercent: robot.battery.percent,
     charging: robot.battery.charging,
     lastReportAt: robot.lastReportAt,
@@ -163,7 +168,7 @@ export function useFleetOverview() {
 
   const siteTiles: SiteTileView[] = sites.map((site) => {
     const counts = aggregates?.bySite[site.id] ?? emptyCounts;
-    const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+    const total = totalOf(counts);
     return {
       id: site.id,
       name: site.name,
@@ -186,6 +191,7 @@ export function useFleetOverview() {
     attentionGroups,
     attentionTotal: aggregates?.byStatus.attention ?? 0,
     statusCounts: aggregates?.byStatus ?? emptyCounts,
+    statusTotal: totalOf(aggregates?.byStatus ?? emptyCounts),
     rows,
     totalRobots: robots.size,
     isFiltered: isActive,
