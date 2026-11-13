@@ -70,7 +70,7 @@ Every significant decision has an ADR in [docs/adr](docs/adr), including the opt
 | [0013](docs/adr/0013-commit-convention.md)                           | Commit convention                                                             |
 | [0014](docs/adr/0014-react-compiler-and-render-performance.md)       | React Compiler and render performance                                         |
 | [0015](docs/adr/0015-theme-from-cookie-and-system-preference.md)     | Theme from a cookie and the system preference                                 |
-| [0016](docs/adr/0016-shared-seen-marks.md)                           | Shared seen marks on attention groups                                         |
+| [0016](docs/adr/0016-shared-acknowledgement.md)                      | Shared acknowledgement of attention groups                                    |
 
 ## What I faked or left out, and why that was the right trade
 
@@ -85,7 +85,7 @@ Every significant decision has an ADR in [docs/adr](docs/adr), including the opt
 The work was planned in vertical slices so that whatever is finished is complete:
 
 1. **Core (done):** everything above.
-2. **Scale (next):** a canvas grid view of the whole fleet with keyboard navigation, a measured 10,000-robot profile, a command palette, seen/unseen acknowledgement of attention groups.
+2. **Scale (next):** a canvas grid view of the whole fleet with keyboard navigation, a measured 10,000-robot profile, a command palette, shared acknowledgement of attention groups.
 3. **Depth:** MassRobotics as a second protocol, SQLite history (battery chart, trail, activity), mobile layout, Playwright end-to-end tests with axe in both themes.
 
 ## At 100×
