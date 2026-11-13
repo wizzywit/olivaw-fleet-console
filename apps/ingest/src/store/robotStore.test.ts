@@ -75,6 +75,16 @@ describe('robot store', () => {
     expect(store.drainChanges().changed).toEqual([{ id: 'DLV-0087', status: 'offline' }]);
   });
 
+  it('skips the diff work for robots a sweep left unchanged', () => {
+    store.applyObservation(anObservation(), t(0));
+    store.drainChanges();
+    store.sweep(t(1000));
+    const stringify = vi.spyOn(JSON, 'stringify');
+    expect(store.drainChanges().changed).toEqual([]);
+    expect(stringify).not.toHaveBeenCalled();
+    stringify.mockRestore();
+  });
+
   it('turns a robot offline when its connection breaks and online again on its next state', () => {
     store.applyObservation(anObservation(), t(0));
     store.applyConnection('DLV-0087', 'broken', t(500));

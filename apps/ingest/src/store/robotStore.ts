@@ -49,6 +49,9 @@ function toSummary(record: RobotRecord, siteId: string): RobotSummaryDto {
   };
 }
 
+const derivedState = (record: RobotRecord) =>
+  `${record.status}|${record.attentionReasons.join(',')}|${String(record.attentionSince?.getTime())}`;
+
 function diffSummary(previous: RobotSummaryDto | undefined, next: RobotSummaryDto): RobotPatchDto | null {
   if (previous === undefined) return next;
   const before: Readonly<Record<string, unknown>> = previous;
@@ -64,11 +67,13 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
   const lastSent = new Map<string, RobotSummaryDto>();
   const touched = new Set<string>();
 
-  function recompute(record: RobotRecord, now: Date): void {
+  // Returns whether the derived state moved, so the sweep only queues robots whose status actually changed.
+  function recompute(record: RobotRecord, now: Date): boolean {
+    const before = derivedState(record);
     record.attentionReasons = deriveAttentionReasons(record, now, config);
     record.status = deriveStatus(record, now, config);
     record.attentionSince = record.status === 'attention' ? (record.attentionSince ?? now) : null;
-    touched.add(record.robotId);
+    return before !== derivedState(record);
   }
 
   function aggregates(): FleetAggregatesDto {
@@ -99,6 +104,7 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
       };
       records.set(record.robotId, { record, siteId });
       recompute(record, now);
+      touched.add(record.robotId);
     },
 
     applyConnection(robotId: string, state: ConnectionState, now: Date): void {
@@ -106,10 +112,13 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
       if (entry === undefined) return;
       entry.record.connection = state;
       recompute(entry.record, now);
+      touched.add(robotId);
     },
 
     sweep(now: Date): void {
-      for (const { record } of records.values()) recompute(record, now);
+      for (const { record } of records.values()) {
+        if (recompute(record, now)) touched.add(record.robotId);
+      }
     },
 
     drainChanges(): { changed: RobotPatchDto[]; removed: string[] } {
