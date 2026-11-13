@@ -120,9 +120,9 @@ Checked on 2026-11-13; quotes are short excerpts.
 | Q2 attention          | §6 status rules                  | Tier 1                                                                    |
 | Q3 freshness          | §5 States, §6, §7                | Tier 1                                                                    |
 | Q4 detail             | §5 Robot detail                  | Tier 1; tier 3 history                                                    |
-| Q5 search and filters | §5                               | Tier 1; tier 2 command palette                                            |
+| Q5 search and filters | §5                               | Tier 1; tier 2 command palette (ADR 0017)                                 |
 | Q6 actions            | §5, §2 non-goals                 | Tier 1                                                                    |
 | Q7 vendor neutral     | §6 adapters                      | Tier 1; tier 3 MassRobotics                                               |
-| Scale                 | §7 scale notes, §8 performance   | Tier 1; tier 2 grid and 10k profile                                       |
+| Scale                 | §7 scale notes, §8 performance   | Tier 1; tier 2 grid and 10k profile (ADR 0011, ADR 0018, README)          |
 | Accessibility, themes | §3, design system                | Tier 1; tier 3 Playwright + axe                                           |
 | Alerting (deferred)   | §2 non-goals                     | Tier 2 shared acknowledgement (ADR 0016); notifications beyond this build |
