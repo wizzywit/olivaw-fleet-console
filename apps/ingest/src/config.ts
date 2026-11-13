@@ -2,8 +2,8 @@ import { z } from 'zod';
 import type { DomainConfig } from './robot/types';
 
 const envSchema = z.object({
-  MQTT_PORT: z.coerce.number().int().positive().default(1883),
-  HTTP_PORT: z.coerce.number().int().positive().default(4000),
+  MQTT_PORT: z.coerce.number().int().min(0).max(65535).default(1883),
+  HTTP_PORT: z.coerce.number().int().min(0).max(65535).default(4000),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   REPORT_INTERVAL_MS: z.coerce.number().int().positive().default(1000),
   CRITICAL_BATTERY_PERCENT: z.coerce.number().min(0).max(100).default(15),
