@@ -1,9 +1,10 @@
-import type {
-  ConnectionState,
-  FleetAggregatesDto,
-  RobotDetailDto,
-  RobotPatchDto,
-  RobotSummaryDto,
+import {
+  robotPatchDtoSchema,
+  type ConnectionState,
+  type FleetAggregatesDto,
+  type RobotDetailDto,
+  type RobotPatchDto,
+  type RobotSummaryDto,
 } from '@olivaw/contracts';
 import { siteIdForMap, zoneAt } from '@olivaw/demo-world';
 import { computeAggregates } from '../robot/aggregates';
@@ -50,15 +51,12 @@ function toSummary(record: RobotRecord, siteId: string): RobotSummaryDto {
 
 function diffSummary(previous: RobotSummaryDto | undefined, next: RobotSummaryDto): RobotPatchDto | null {
   if (previous === undefined) return next;
-  const changed: RobotPatchDto = { id: next.id };
-  let hasChanges = false;
-  for (const key of Object.keys(next) as (keyof RobotSummaryDto)[]) {
-    if (JSON.stringify(previous[key]) !== JSON.stringify(next[key])) {
-      Object.assign(changed, { [key]: next[key] });
-      hasChanges = true;
-    }
-  }
-  return hasChanges ? changed : null;
+  const before: Readonly<Record<string, unknown>> = previous;
+  const changed = Object.entries(next).filter(
+    ([key, value]) => JSON.stringify(before[key]) !== JSON.stringify(value),
+  );
+  if (changed.length === 0) return null;
+  return robotPatchDtoSchema.parse({ ...Object.fromEntries(changed), id: next.id });
 }
 
 export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) {
