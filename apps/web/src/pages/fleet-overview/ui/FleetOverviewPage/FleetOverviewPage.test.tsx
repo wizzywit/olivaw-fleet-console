@@ -115,6 +115,12 @@ describe('fleet overview', () => {
     );
   });
 
+  it('says Live in the last report column for robots that are still reporting', async () => {
+    renderWithProviders(<FleetOverviewPage />);
+    await screen.findByRole('rowheader', { name: /CLN-0142/ });
+    expect(within(rowFor('CLN-0142') ?? document.body).getByText('Live')).toBeInTheDocument();
+  });
+
   it('narrows the list with the status chips and keeps the choice in the url', async () => {
     renderWithProviders(<FleetOverviewPage />);
     await userEvent.click(await screen.findByRole('radio', { name: /Needs attention/ }));

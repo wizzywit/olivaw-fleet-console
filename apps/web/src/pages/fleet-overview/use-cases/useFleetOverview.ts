@@ -25,6 +25,7 @@ import {
 } from '@/entities/robot';
 import { matchesFleetFilter, useFleetFilter } from '@/features/filter-fleet';
 import { formatCount, formatPercent, useNow } from '@/shared/lib';
+import { lastReportLabel } from '../services/lastReport';
 import { describeRobot } from '../services/robotDescription';
 import { reconcileOrder } from '../services/stableOrder';
 import { statusBreakdown } from '../services/statusBreakdown';
@@ -251,6 +252,7 @@ export function useFleetOverview() {
     criticalBatteryPercent: config?.criticalBatteryPercent ?? 15,
     now,
     describeRow: describeRobot,
+    lastReportLabel,
     openRobot: (href: string) => {
       router.push(href);
     },

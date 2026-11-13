@@ -9,6 +9,8 @@ export const robotDetailQuery = (robotId: string) =>
     queryKey: ['robot', robotId, 'detail'],
     queryFn: () => fetchRobotDetail(robotId),
     refetchOnWindowFocus: true,
+    // The fleet stream leaves position out (ADR 0018); the open robot refreshes its own detail every second.
+    refetchInterval: 1000,
   });
 
 export function useRobotDetailRepository(robotId: string) {

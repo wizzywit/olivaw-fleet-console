@@ -115,6 +115,7 @@ export function FleetOverviewPage() {
                   onOpen={overview.openRobot}
                   onHeldChange={overview.setHeld}
                   describeRow={overview.describeRow}
+                  lastReportLabel={overview.lastReportLabel}
                   notice={heldNotice}
                 />
               )}

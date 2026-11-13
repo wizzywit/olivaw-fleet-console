@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRef, useState, type KeyboardEvent } from 'react';
 import type { ReactNode } from 'react';
 import { RobotStatusBadge } from '@/entities/robot';
-import { formatRelativeTime } from '@/shared/lib';
 import { BatteryMeter, KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
 import { useHoldWhileWorking } from '../../use-cases/useHoldWhileWorking';
@@ -19,6 +18,7 @@ export interface RobotTableProps {
   onHeldChange: (isHeld: boolean) => void;
   notice?: ReactNode;
   describeRow: (row: RobotRowView, position: string) => string;
+  lastReportLabel: (row: RobotRowView, now: Date) => string;
 }
 
 const rowHeight = 52;
@@ -30,6 +30,7 @@ export function RobotTable({
   onOpen,
   onHeldChange,
   describeRow,
+  lastReportLabel,
   notice,
 }: RobotTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -126,7 +127,7 @@ export function RobotTable({
                       isStale={row.isStale}
                     />
                   </td>
-                  <td className={styles.right}>{formatRelativeTime(row.lastReportAt, now)}</td>
+                  <td className={styles.right}>{lastReportLabel(row, now)}</td>
                 </tr>
               );
             })}

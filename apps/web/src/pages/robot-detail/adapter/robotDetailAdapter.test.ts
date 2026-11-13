@@ -6,6 +6,7 @@ import { fetchRobotDetail, sendRobotCommand } from './robotDetailAdapter';
 const detailDto = {
   ...aRobotDto(),
   serialNumber: 'CLN-0142',
+  position: { x: 120.4, y: 38.2, headingRad: 1.57, mapId: 't2-l0' },
   errors: [{ level: 'urgent', code: 'BATTERY_LOW', description: null }],
   rawMessage: { protocol: 'vda5050', receivedAt: '2026-11-13T10:00:00.000Z', payload: { headerId: 1 } },
 };
@@ -15,6 +16,7 @@ describe('robot detail adapter', () => {
     server.use(http.get('*/api/robots/CLN-0142', () => HttpResponse.json(detailDto)));
     await expect(fetchRobotDetail('CLN-0142')).resolves.toEqual({
       serialNumber: 'CLN-0142',
+      position: { x: 120.4, y: 38.2, headingRad: 1.57, mapId: 't2-l0' },
       errors: [{ level: 'urgent', code: 'BATTERY_LOW', description: null }],
       rawMessage: {
         protocol: 'vda5050',

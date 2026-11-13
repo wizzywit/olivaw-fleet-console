@@ -20,7 +20,6 @@ export interface Robot {
   attentionReasons: AttentionReason[];
   attentionSince: Date | null;
   battery: { percent: number; charging: boolean };
-  position: { x: number; y: number; headingRad: number; mapId: string };
   speedMps: number;
   operatingMode: string;
   taskId: string | null;

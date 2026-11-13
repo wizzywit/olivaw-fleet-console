@@ -8,9 +8,13 @@ const robotPath = (robotId: string) => `/api/robots/${encodeURIComponent(robotId
 // The live summary comes from the fleet stream; this adapter maps only what the detail adds.
 export async function fetchRobotDetail(robotId: string): Promise<RobotDetailExtras | null> {
   try {
-    const { serialNumber, errors, rawMessage } = await httpGet(robotPath(robotId), robotDetailDtoSchema);
+    const { serialNumber, position, errors, rawMessage } = await httpGet(
+      robotPath(robotId),
+      robotDetailDtoSchema,
+    );
     return {
       serialNumber,
+      position,
       errors,
       rawMessage: { ...rawMessage, receivedAt: new Date(rawMessage.receivedAt) },
     };
