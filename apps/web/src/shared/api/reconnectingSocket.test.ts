@@ -77,4 +77,25 @@ describe('createReconnectingSocket', () => {
     socket.close();
     expect(statuses.at(-1)?.[0]).toBe('closed');
   });
+
+  it('keeps reporting reconnecting while a retry attempt connects, not connecting as on first load', async () => {
+    let connections = 0;
+    const statuses: SocketStatus[] = [];
+    server.use(
+      live.addEventListener('connection', ({ client }) => {
+        connections += 1;
+        if (connections === 1) client.close();
+      }),
+    );
+    const socket = createReconnectingSocket({
+      url,
+      onOpen: () => undefined,
+      onMessage: () => undefined,
+      onStatus: (status) => statuses.push(status),
+      backoff: () => 10,
+    });
+    await waitFor(() => connections === 2 && statuses.at(-1) === 'open');
+    expect(statuses.slice(statuses.indexOf('reconnecting'))).toEqual(['reconnecting', 'reconnecting', 'open']);
+    socket.close();
+  });
 });

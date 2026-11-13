@@ -46,7 +46,7 @@ export function createReconnectingSocket({
 
   function connect(): void {
     retryTimer = null;
-    onStatus('connecting', null);
+    onStatus(attempt === 0 ? 'connecting' : 'reconnecting', null);
     const current = new WebSocket(url);
     socket = current;
     current.addEventListener('open', () => {
