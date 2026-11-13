@@ -4,10 +4,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useFleetRobots, useFleetSites, useLivePause } from '@/entities/fleet';
 import { compareByUrgency, robotStatusLabel, type RobotStatus } from '@/entities/robot';
-import { matchesFleetSearch, useFleetFilter } from '@/features/filter-fleet';
+import { fleetSearchMatcher, useFleetFilter } from '@/features/filter-fleet';
 import { useViewMode } from '@/features/switch-fleet-view';
 import { useThemeToggle } from '@/features/toggle-theme';
-import { formatPercent, useKeyboardShortcut } from '@/shared/lib';
+import { formatPercent, takeSmallest, useKeyboardShortcut } from '@/shared/lib';
 
 interface PaletteCommand {
   id: string;
@@ -48,18 +48,18 @@ export function useCommandPalette() {
   const robotCommands: PaletteCommand[] =
     needle === ''
       ? []
-      : [...robots.values()]
-          .filter((robot) => matchesFleetSearch(robot, query, siteName))
-          .sort(compareByUrgency)
-          .slice(0, maxRobotResults)
-          .map((robot) => ({
-            id: `robot:${robot.id}`,
-            label: robot.id,
-            detail: `${robotStatusLabel(robot.status)} · ${siteName(robot.siteId) ?? robot.siteId} · battery ${formatPercent(robot.battery.percent)}`,
-            run: () => {
-              router.push(`/robots/${encodeURIComponent(robot.id)}`);
-            },
-          }));
+      : takeSmallest(
+          [...robots.values()].filter(fleetSearchMatcher(query, siteName)),
+          maxRobotResults,
+          compareByUrgency,
+        ).map((robot) => ({
+          id: `robot:${robot.id}`,
+          label: robot.id,
+          detail: `${robotStatusLabel(robot.status)} · ${siteName(robot.siteId) ?? robot.siteId} · battery ${formatPercent(robot.battery.percent)}`,
+          run: () => {
+            router.push(`/robots/${encodeURIComponent(robot.id)}`);
+          },
+        }));
 
   const filterCommands: PaletteCommand[] = isFleetPage
     ? [

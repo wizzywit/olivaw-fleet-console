@@ -27,14 +27,12 @@ export function matchesFleetFilter(
   return words.every((word) => searchable.some((field) => contains(field, word)));
 }
 
-// The same matching as the fleet search, for a typed query on its own (the command palette).
-export const matchesFleetSearch = (
-  robot: Robot,
+// The same matching as the fleet search for a typed query on its own (the command palette). The query is parsed once,
+// so matching 10,000 robots per keystroke costs one pass.
+export function fleetSearchMatcher(
   rawQuery: string,
   siteName: (siteId: string) => string | undefined,
-): boolean =>
-  matchesFleetFilter(
-    robot,
-    { status: 'all', siteId: null, rawQuery, query: parseFleetQuery(rawQuery) },
-    siteName,
-  );
+): (robot: Robot) => boolean {
+  const filter: FleetFilter = { status: 'all', siteId: null, rawQuery, query: parseFleetQuery(rawQuery) };
+  return (robot) => matchesFleetFilter(robot, filter, siteName);
+}

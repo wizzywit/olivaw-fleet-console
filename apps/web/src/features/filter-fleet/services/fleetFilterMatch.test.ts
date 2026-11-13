@@ -1,7 +1,7 @@
 import { aRobot } from '@/test/robotFixtures';
 import { defaultFleetFilter } from '../types/fleetFilter';
 import { parseFleetQuery } from './fleetQuery';
-import { matchesFleetFilter } from './fleetFilterMatch';
+import { matchesFleetFilter, fleetSearchMatcher } from './fleetFilterMatch';
 
 const siteName = (id: string) => ({ 'airport-t2': 'Airport T2', 'hotel-isar': 'Hotel Isar' })[id];
 const robot = aRobot({
@@ -38,5 +38,14 @@ describe('matchesFleetFilter', () => {
     expect(matchesFleetFilter(robot, withQuery('battery:<12'), siteName)).toBe(false);
     expect(matchesFleetFilter(robot, withQuery('vendor:nordbot'), siteName)).toBe(false);
     expect(matchesFleetFilter(robot, withQuery('site:isar'), siteName)).toBe(true);
+  });
+});
+
+describe('fleetSearchMatcher', () => {
+  it('parses a typed query once and then matches robots like the fleet search', () => {
+    const siteName = () => 'Hotel Isar';
+    const matches = fleetSearchMatcher('isar battery:<20', siteName);
+    expect(matches(aRobot({ battery: { percent: 12, charging: false } }))).toBe(true);
+    expect(matches(aRobot({ battery: { percent: 40, charging: false } }))).toBe(false);
   });
 });
