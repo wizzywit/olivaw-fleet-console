@@ -7,6 +7,7 @@ import { AttentionList } from './AttentionList';
 const group = (count: number): AttentionGroupView[] => [
   {
     reason: 'battery-critical',
+    isClear: false,
     priority: 'high',
     count,
     countLabel: `${count} robots`,

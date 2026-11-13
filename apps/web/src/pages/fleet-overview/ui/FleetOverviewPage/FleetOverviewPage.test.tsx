@@ -89,6 +89,24 @@ describe('fleet overview', () => {
     expect(await screen.findByText('Not saved. Try again.')).toBeInTheDocument();
   });
 
+  it('keeps all four attention reasons in fixed places, marking empty ones clear', async () => {
+    renderWithProviders(<FleetOverviewPage />);
+    const attention = await screen.findByRole('region', { name: /Needs your attention/ });
+    await within(attention).findByText(/Battery critical · 1 robot/);
+    const rows = within(attention).getAllByRole('listitem');
+    expect(rows.map((row) => row.textContent.split(' ·')[0])).toEqual([
+      'Emergency stop',
+      'Error reported',
+      'Battery critical',
+      'Stopped with a task',
+    ]);
+    expect(rows[0]).toHaveTextContent('Clear');
+    expect(within(rows[0] ?? document.body).queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      within(rows[2] ?? document.body).getByRole('button', { name: 'Acknowledge Battery critical' }),
+    ).toBeInTheDocument();
+  });
+
   it('narrows the list with the status chips and keeps the choice in the url', async () => {
     renderWithProviders(<FleetOverviewPage />);
     await userEvent.click(await screen.findByRole('radio', { name: /Needs attention/ }));

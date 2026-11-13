@@ -27,6 +27,14 @@ import { formatCount, formatPercent, useNow } from '@/shared/lib';
 import { describeRobot } from '../services/robotDescription';
 import { reconcileOrder } from '../services/stableOrder';
 
+// Every reason keeps its own row in this order, so the panel never changes height or reorders as counts change.
+const attentionSlots: readonly AttentionReason[] = [
+  'emergency-stop',
+  'error-reported',
+  'battery-critical',
+  'stuck',
+];
+
 const emptyCounts: StatusCounts = { working: 0, charging: 0, idle: 0, attention: 0, offline: 0 };
 
 export interface SiteTileView {
@@ -40,13 +48,14 @@ export interface SiteTileView {
 
 export interface AttentionGroupView {
   reason: AttentionReason;
-  priority: AttentionPriority;
+  isClear: boolean;
+  priority: AttentionPriority | null;
   count: number;
   countLabel: string;
   unacknowledgedCount: number;
   robotIds: readonly string[];
-  worstHref: string;
-  worstLabel: string;
+  worstHref: string | null;
+  worstLabel: string | null;
 }
 
 export interface RobotRowView {
@@ -151,14 +160,30 @@ export function useFleetOverview() {
     return robot === undefined ? [] : [toRow(robot)];
   });
 
-  const attentionGroups: AttentionGroupView[] = (aggregates?.attentionGroups ?? []).map((group) => {
+  const groupsByReason = new Map((aggregates?.attentionGroups ?? []).map((group) => [group.reason, group]));
+  const attentionGroups: AttentionGroupView[] = attentionSlots.map((reason) => {
+    const group = groupsByReason.get(reason);
+    if (group === undefined) {
+      return {
+        reason,
+        isClear: true,
+        priority: null,
+        count: 0,
+        countLabel: 'Clear',
+        unacknowledgedCount: 0,
+        robotIds: [],
+        worstHref: null,
+        worstLabel: null,
+      };
+    }
     const worst = robots.get(group.worstRobotId);
     const worstLabel =
       worst === undefined
         ? group.worstRobotId
         : `${worst.id} · ${siteName(worst.siteId) ?? worst.siteId}${worst.zone === null ? '' : `, ${worst.zone}`} · battery ${formatPercent(worst.battery.percent)}`;
     return {
-      reason: group.reason,
+      reason,
+      isClear: false,
       priority: group.priority,
       count: group.count,
       countLabel: `${formatCount(group.count)} ${group.count === 1 ? 'robot' : 'robots'}`,

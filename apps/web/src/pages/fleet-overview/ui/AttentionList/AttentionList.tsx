@@ -54,24 +54,39 @@ export function AttentionList({ groups, total }: { groups: AttentionGroupView[];
       <h2 id="attention-heading" className={styles.heading}>
         Needs your attention · {total} {total === 1 ? 'robot' : 'robots'}
       </h2>
-      {groups.length === 0 ? (
-        <p className={styles.none}>Nothing needs you right now.</p>
-      ) : (
-        <ul className={styles.list}>
-          {groups.map((group) => (
-            <li key={group.reason} className={styles.group} data-highlighted={highlighted.has(group.reason)}>
+      <ul className={styles.list}>
+        {groups.map((group) => (
+          <li
+            key={group.reason}
+            className={styles.group}
+            data-clear={group.isClear}
+            data-highlighted={highlighted.has(group.reason)}
+          >
+            <div className={styles.text}>
               <div className={styles.summary}>
                 <span className={styles.title}>
                   {copy[group.reason].title} · {group.countLabel}
                 </span>
-                <PriorityTag priority={group.priority} />
-                {group.unacknowledgedCount > 0 ? (
-                  <span className={styles.unacknowledged}>{group.unacknowledgedCount} unacknowledged</span>
-                ) : (
-                  <span className={styles.acknowledged}>All acknowledged</span>
-                )}
+                {group.priority !== null && <PriorityTag priority={group.priority} />}
+                {!group.isClear &&
+                  (group.unacknowledgedCount > 0 ? (
+                    <span className={styles.unacknowledged}>{group.unacknowledgedCount} unacknowledged</span>
+                  ) : (
+                    <span className={styles.acknowledged}>All acknowledged</span>
+                  ))}
               </div>
               <p className={styles.action}>{copy[group.reason].action}</p>
+              <p className={styles.worst}>
+                {group.worstHref === null ? (
+                  'No robot needs this now.'
+                ) : (
+                  <>
+                    Most urgent: <Link href={group.worstHref}>{group.worstLabel}</Link>
+                  </>
+                )}
+              </p>
+            </div>
+            <div className={styles.actionArea}>
               {group.unacknowledgedCount > 0 && (
                 <AcknowledgeButton
                   reason={group.reason}
@@ -79,13 +94,10 @@ export function AttentionList({ groups, total }: { groups: AttentionGroupView[];
                   robotIds={group.robotIds}
                 />
               )}
-              <p className={styles.worst}>
-                Most urgent: <Link href={group.worstHref}>{group.worstLabel}</Link>
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
