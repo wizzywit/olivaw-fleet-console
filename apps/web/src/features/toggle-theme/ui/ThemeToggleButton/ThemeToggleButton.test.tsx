@@ -1,15 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider } from '../../repository/ThemeProvider';
+import { ThemeContext, useThemeController } from '../../repository/themeContext';
 import { ThemeToggleButton } from './ThemeToggleButton';
+
+function WithTheme({ children }: { children: React.ReactNode }) {
+  return <ThemeContext.Provider value={useThemeController()}>{children}</ThemeContext.Provider>;
+}
 
 describe('ThemeToggleButton', () => {
   it('switches between light and dark and says what it will do', async () => {
     document.documentElement.dataset.theme = 'light';
     render(
-      <ThemeProvider>
+      <WithTheme>
         <ThemeToggleButton />
-      </ThemeProvider>,
+      </WithTheme>,
     );
     await userEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     expect(document.documentElement.dataset.theme).toBe('dark');

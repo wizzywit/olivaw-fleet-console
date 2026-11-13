@@ -7,8 +7,8 @@ import { fleetLiveStore } from './fleetLiveStore';
 import { fleetSnapshotQuery, fleetSnapshotQueryKey } from './fleetSnapshotQuery';
 
 // Keeps the app-wide live store in sync: seeds it from the snapshot, opens the live connection once seeded,
-// refetches on resync, and applies held patches when the tab becomes visible again. Renders nothing.
-export function FleetLiveConnection() {
+// refetches on resync, and applies held patches when the tab becomes visible again. Called once by the app.
+export function useFleetLiveSync(): void {
   const queryClient = useQueryClient();
   const snapshot = useQuery(fleetSnapshotQuery());
 
@@ -56,6 +56,4 @@ export function FleetLiveConnection() {
       connection?.close();
     };
   }, [queryClient]);
-
-  return null;
 }

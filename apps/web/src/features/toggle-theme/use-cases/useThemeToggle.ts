@@ -1,6 +1,6 @@
 'use client';
 
-import { useThemeRepository } from '../repository/useThemeRepository';
+import { useThemeRepository } from '../repository/themeContext';
 
 export function useThemeToggle() {
   const { theme, setTheme } = useThemeRepository();

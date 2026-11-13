@@ -1,17 +1,9 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
-import { FleetLiveConnection } from '@/entities/fleet';
-import { ThemeProvider } from '@/features/toggle-theme';
+import { Providers } from '@/app/entrypoint/Providers';
 
 export function renderWithProviders(ui: ReactElement) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <FleetLiveConnection />
-        {ui}
-      </ThemeProvider>
-    </QueryClientProvider>,
-  );
+  return render(<Providers queryClient={queryClient}>{ui}</Providers>);
 }

@@ -1,6 +1,7 @@
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { FleetSnapshotHydration } from '@/entities/fleet';
+import { connection } from 'next/server';
+import { prefetchFleetSnapshot } from '@/entities/fleet';
 import { ThemeBootstrapScript } from '@/features/toggle-theme';
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -9,7 +10,10 @@ import { Providers } from './Providers';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains', display: 'swap' });
 
-export function RootLayout({ children }: { children: ReactNode }) {
+export async function RootLayout({ children }: { children: ReactNode }) {
+  // Fleet data is live, so every request renders fresh instead of using a snapshot frozen at build time.
+  await connection();
+  const dehydratedState = await prefetchFleetSnapshot();
   return (
     <html
       lang="en"
@@ -21,9 +25,7 @@ export function RootLayout({ children }: { children: ReactNode }) {
         <ThemeBootstrapScript />
       </head>
       <body>
-        <Providers>
-          <FleetSnapshotHydration>{children}</FleetSnapshotHydration>
-        </Providers>
+        <Providers dehydratedState={dehydratedState}>{children}</Providers>
       </body>
     </html>
   );
