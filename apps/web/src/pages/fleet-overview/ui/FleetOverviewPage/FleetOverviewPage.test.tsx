@@ -137,6 +137,24 @@ describe('fleet overview', () => {
     expect(screen.getByRole('columnheader', { name: 'Status' })).not.toHaveAttribute('aria-sort');
   });
 
+  it('switches between table and grid, keeps the choice in the url, and toggles with g', async () => {
+    renderWithProviders(<FleetOverviewPage />);
+    const views = await screen.findByRole('radiogroup', { name: 'View' });
+    await userEvent.click(within(views).getByRole('radio', { name: 'Grid' }));
+    expect(window.location.search).toBe('?view=grid');
+    expect(within(views).getByRole('radio', { name: 'Grid' })).toBeChecked();
+    await userEvent.keyboard('g');
+    expect(window.location.search).toBe('');
+    expect(within(views).getByRole('radio', { name: 'Table' })).toBeChecked();
+  });
+
+  it('opens the grid when the url asks for it', async () => {
+    navigation.visit('/?view=grid');
+    renderWithProviders(<FleetOverviewPage />);
+    const views = await screen.findByRole('radiogroup', { name: 'View' });
+    expect(within(views).getByRole('radio', { name: 'Grid' })).toBeChecked();
+  });
+
   it('explains an empty result and clears the filters', async () => {
     navigation.visit('/?q=nothing-matches-this');
     renderWithProviders(<FleetOverviewPage />);

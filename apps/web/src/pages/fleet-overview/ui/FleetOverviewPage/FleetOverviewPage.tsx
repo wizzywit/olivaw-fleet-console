@@ -3,8 +3,9 @@
 import { StatusFilterChips } from '@/features/filter-fleet';
 import { AppHeader } from '@/widgets/app-header';
 import { LiveConnectionBanner } from '@/widgets/live-connection-banner';
-import { Button, EmptyState, Skeleton } from '@/shared/ui';
+import { Button, EmptyState, Skeleton, ToggleChipGroup } from '@/shared/ui';
 import { useFleetOverview } from '../../use-cases/useFleetOverview';
+import { useViewMode } from '../../use-cases/useViewMode';
 import { AttentionList } from '../AttentionList/AttentionList';
 import { RobotTable } from '../RobotTable/RobotTable';
 import { SiteTiles } from '../SiteTiles/SiteTiles';
@@ -12,6 +13,7 @@ import styles from './FleetOverviewPage.module.css';
 
 export function FleetOverviewPage() {
   const overview = useFleetOverview();
+  const viewMode = useViewMode();
   return (
     <>
       <AppHeader />
@@ -42,6 +44,12 @@ export function FleetOverviewPage() {
                   Robots
                 </h2>
                 <StatusFilterChips counts={overview.statusCounts} total={overview.statusTotal} />
+                <ToggleChipGroup
+                  label="View"
+                  items={viewMode.options}
+                  selectedId={viewMode.view}
+                  onChange={viewMode.selectView}
+                />
                 {overview.pendingChanges > 0 && (
                   <div role="status" className={styles.held}>
                     Order paused while you work · {overview.pendingChanges}{' '}
