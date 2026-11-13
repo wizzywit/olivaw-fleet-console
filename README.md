@@ -74,6 +74,7 @@ Every significant decision has an ADR in [docs/adr](docs/adr), including the opt
 | [0016](docs/adr/0016-shared-acknowledgement.md)                      | Shared acknowledgement of attention groups                                    |
 | [0017](docs/adr/0017-command-palette.md)                             | Command palette                                                               |
 | [0018](docs/adr/0018-lean-fleet-stream.md)                           | A lean fleet stream                                                           |
+| [0019](docs/adr/0019-scaling-live-views.md)                          | Scaling live views that need position and report times (proposed)             |
 
 ## What I faked or left out, and why that was the right trade
 
@@ -120,7 +121,7 @@ The spec's target, input delay under 100 ms at 10,000 robots, holds before and a
 What breaks first with hundreds of thousands of robots, and what I would change:
 
 - **One process, one event loop.** Move to an external MQTT broker cluster with shared subscriptions and run several ingest instances, sharded by site.
-- **Every console gets every change.** Add per-view subscriptions: the overview gets coalesced summaries, a detail page subscribes to one robot at full rate (today it refreshes its detail every second; position already left the fleet stream, ADR 0018). Fan out through a pub/sub layer.
+- **Every console gets every change.** Add per-view subscriptions: the overview gets coalesced summaries, a detail page subscribes to one robot at full rate (today it refreshes its detail every second; position already left the fleet stream, ADR 0018). Fan out through a pub/sub layer. ADR 0019 sets out the design for views that need positions or report times.
 - **The client holds the whole fleet.** At 100k, filter, sort and page on the server and keep only the visible window on the client.
 - **History in memory.** Use a time-series store with downsampling.
 
