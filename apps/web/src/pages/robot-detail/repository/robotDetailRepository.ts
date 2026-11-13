@@ -13,7 +13,14 @@ export const robotDetailQuery = (robotId: string) =>
 
 export function useRobotDetailRepository(robotId: string) {
   const query = useQuery(robotDetailQuery(robotId));
-  return { detail: query.data, isLoading: query.isPending, error: query.error };
+  return {
+    detail: query.data,
+    isLoading: query.isPending,
+    error: query.error,
+    retry: () => {
+      void query.refetch();
+    },
+  };
 }
 
 export function useRobotCommandRepository(robotId: string) {

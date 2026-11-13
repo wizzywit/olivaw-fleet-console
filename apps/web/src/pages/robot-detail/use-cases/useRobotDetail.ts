@@ -50,7 +50,7 @@ export function useRobotDetail(robotId: string) {
   const config = useFleetConfig();
   const live = useLiveStatus();
   const fleet = useFleetRepository();
-  const { detail, isLoading, error } = useRobotDetailRepository(robotId);
+  const { detail, isLoading, error, retry } = useRobotDetailRepository(robotId);
   const command = useRobotCommandRepository(robotId);
   const now = useNow(1000);
 
@@ -58,7 +58,7 @@ export function useRobotDetail(robotId: string) {
     let state: 'loading' | 'not-found' | 'error' = 'not-found';
     if (isLoading || fleet.isLoading) state = 'loading';
     else if (detail === undefined && error !== null) state = 'error';
-    return { state, robotId };
+    return { state, robotId, retry };
   }
 
   const site = sites.find((candidate) => candidate.id === robot.siteId);
@@ -129,12 +129,16 @@ export function useRobotDetail(robotId: string) {
       { label: 'Last report', value: formatRelativeTime(robot.lastReportAt, now), hint: robot.connection },
     ],
     locationMap,
-    errors: (detail?.errors ?? []).map((item) => ({
-      key: `${item.level}-${item.code}`,
-      levelLabel: errorLevelLabels[item.level],
-      code: item.code,
-      description: item.description,
-    })),
+    errors:
+      detail === undefined && error !== null
+        ? null
+        : (detail?.errors ?? []).map((item) => ({
+            key: `${item.level}-${item.code}`,
+            levelLabel: errorLevelLabels[item.level],
+            code: item.code,
+            description: item.description,
+          })),
+    retryDetail: retry,
     raw:
       detail === undefined || detail === null
         ? null

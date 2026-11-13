@@ -109,4 +109,26 @@ describe('robot detail', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send to dock' })).toBeDisabled();
   });
+
+  it('says the error details could not be loaded instead of claiming there are none, and retries', async () => {
+    let detailRequests = 0;
+    server.use(
+      http.get('*/api/robots/DLV-0087', () => {
+        detailRequests += 1;
+        return detailRequests === 1 ? new HttpResponse(null, { status: 500 }) : HttpResponse.json(detail);
+      }),
+    );
+    renderWithProviders(<RobotDetailPage robotId="DLV-0087" />);
+    expect(await screen.findByText('Error details could not be loaded.')).toBeInTheDocument();
+    expect(screen.queryByText('No errors reported.')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText(/BATTERY_LOW/)).toBeInTheDocument();
+  });
+
+  it('offers a retry when a robot outside the snapshot cannot be loaded', async () => {
+    server.use(http.get('*/api/robots/UNKNOWN', () => new HttpResponse(null, { status: 500 })));
+    renderWithProviders(<RobotDetailPage robotId="UNKNOWN" />);
+    expect(await screen.findByText('The robot could not be loaded')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
+  });
 });

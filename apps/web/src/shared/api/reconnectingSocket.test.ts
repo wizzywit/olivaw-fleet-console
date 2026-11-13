@@ -95,7 +95,11 @@ describe('createReconnectingSocket', () => {
       backoff: () => 10,
     });
     await waitFor(() => connections === 2 && statuses.at(-1) === 'open');
-    expect(statuses.slice(statuses.indexOf('reconnecting'))).toEqual(['reconnecting', 'reconnecting', 'open']);
+    expect(statuses.slice(statuses.indexOf('reconnecting'))).toEqual([
+      'reconnecting',
+      'reconnecting',
+      'open',
+    ]);
     socket.close();
   });
 });

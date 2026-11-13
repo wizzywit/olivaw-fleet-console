@@ -55,6 +55,11 @@ export function RobotDetailPage({ robotId }: { robotId: string }) {
           <EmptyState
             title="The robot could not be loaded"
             description="The fleet service did not answer. Try again in a moment."
+            actions={
+              <Button variant="secondary" onPress={detail.retry}>
+                Retry
+              </Button>
+            }
           />
         )}
         {detail.state === 'ready' && (
@@ -127,7 +132,7 @@ export function RobotDetailPage({ robotId }: { robotId: string }) {
             />
             <div className={styles.columns}>
               {detail.locationMap !== null && <LocationMap map={detail.locationMap} />}
-              <ErrorList errors={detail.errors} />
+              <ErrorList errors={detail.errors} onRetry={detail.retryDetail} />
             </div>
             {detail.raw !== null && <RawMessagePanel raw={detail.raw} />}
           </>
