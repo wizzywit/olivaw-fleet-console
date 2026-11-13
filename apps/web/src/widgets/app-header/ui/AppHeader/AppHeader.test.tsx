@@ -10,7 +10,7 @@ vi.mock('next/navigation', () => nextNavigationMock());
 
 describe('AppHeader', () => {
   beforeEach(() => {
-    navigation.search = new URLSearchParams();
+    navigation.reset();
     server.use(...fleetHandlers());
   });
 

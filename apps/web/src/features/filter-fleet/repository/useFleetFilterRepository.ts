@@ -1,14 +1,13 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
-import { fromSearchParams, toSearchParams } from '../adapter/fleetFilterUrlAdapter';
+import { fromSearchParams, replaceFilterInUrl } from '../adapter/fleetFilterUrlAdapter';
 import { parseFleetQuery } from '../services/fleetQuery';
 import type { FleetFilter, FleetFilterParams } from '../types/fleetFilter';
 
 export function useFleetFilterRepository() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname() ?? '/';
   const search = searchParams?.toString() ?? '';
 
@@ -19,10 +18,9 @@ export function useFleetFilterRepository() {
 
   const setFilter = useCallback(
     (next: FleetFilterParams) => {
-      const query = toSearchParams(next).toString();
-      router.replace(query === '' ? pathname : `${pathname}?${query}`, { scroll: false });
+      replaceFilterInUrl(pathname, next);
     },
-    [router, pathname],
+    [pathname],
   );
 
   return { filter, setFilter };

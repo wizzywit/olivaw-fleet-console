@@ -45,7 +45,8 @@ describe('fleet overview', () => {
   it('narrows the list with the status chips and keeps the choice in the url', async () => {
     renderWithProviders(<FleetOverviewPage />);
     await userEvent.click(await screen.findByRole('radio', { name: /Needs attention/ }));
-    expect(navigation.replace).toHaveBeenLastCalledWith('/?status=attention', { scroll: false });
+    expect(window.location.search).toBe('?status=attention');
+    expect(navigation.replace).not.toHaveBeenCalled();
     await waitFor(() => {
       expect(robotRows()).toHaveLength(1);
     });
@@ -90,11 +91,11 @@ describe('fleet overview', () => {
   });
 
   it('explains an empty result and clears the filters', async () => {
-    navigation.search = new URLSearchParams('q=nothing-matches-this');
+    navigation.visit('/?q=nothing-matches-this');
     renderWithProviders(<FleetOverviewPage />);
     expect(await screen.findByRole('heading', { name: 'No robots match these filters' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
-    expect(navigation.replace).toHaveBeenLastCalledWith('/', { scroll: false });
+    expect(window.location.search).toBe('');
   });
 
   it('offers a retry when the fleet cannot be loaded', async () => {

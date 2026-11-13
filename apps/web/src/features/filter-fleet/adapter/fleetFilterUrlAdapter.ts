@@ -17,3 +17,9 @@ export function toSearchParams({ status, siteId, rawQuery }: FleetFilterParams):
   if (rawQuery.trim() !== '') params.set('q', rawQuery);
   return params;
 }
+
+// Native replaceState updates the URL and Next's useSearchParams without a router navigation on every keystroke.
+export function replaceFilterInUrl(pathname: string, params: FleetFilterParams): void {
+  const query = toSearchParams(params).toString();
+  window.history.replaceState(null, '', query === '' ? pathname : `${pathname}?${query}`);
+}
