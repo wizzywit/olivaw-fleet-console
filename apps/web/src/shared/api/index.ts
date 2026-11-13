@@ -1,7 +1,2 @@
 export { HttpError, httpGet, httpPost } from './httpClient';
-export {
-  createReconnectingSocket,
-  type ReconnectingSocket,
-  type ReconnectingSocketOptions,
-  type SocketStatus,
-} from './reconnectingSocket';
+export { createReconnectingSocket, type SocketStatus } from './reconnectingSocket';
