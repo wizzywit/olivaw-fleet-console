@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./fixtures/*": "./src/vda5050/fixtures/*"
   },
   "scripts": {
     "test": "vitest run",
