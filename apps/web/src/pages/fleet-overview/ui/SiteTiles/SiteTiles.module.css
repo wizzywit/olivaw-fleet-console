@@ -1,0 +1,37 @@
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.bar {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.bar > span {
+  flex-basis: 0;
+}
+
+.working {
+  background: var(--working-solid);
+}
+
+.charging {
+  background: var(--charging-solid);
+}
+
+.idle {
+  background: var(--idle-solid);
+}
+
+.attention {
+  background: var(--attention-solid);
+}
+
+.offline {
+  background: var(--offline-solid);
+}
