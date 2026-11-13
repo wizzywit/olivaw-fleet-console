@@ -1,0 +1,12 @@
+node_modules/
+.next/
+dist/
+coverage/
+*.sqlite
+*.sqlite-*
+.env*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+playwright-report/
+test-results/
