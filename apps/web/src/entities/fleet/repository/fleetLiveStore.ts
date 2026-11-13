@@ -1,6 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 import type { Robot } from '@/entities/robot/@x/fleet';
 import { applyRobotPatch } from '../adapter/fleetApiAdapter';
+import { isNewerPatch, patchesAfter } from '../services/patchSequence';
 import type {
   FleetAggregates,
   FleetConfig,
@@ -66,7 +67,7 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
       ...initialState(),
 
       seed(snapshot) {
-        pending = pending.filter((patch) => patch.sequence > snapshot.sequence);
+        pending = patchesAfter(pending, snapshot.sequence);
         set({
           robots: new Map(snapshot.robots),
           aggregates: snapshot.aggregates,
@@ -81,8 +82,7 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
       queuePatch(patch) {
         const { sequence } = get();
         if (sequence === null) return;
-        const latest = Math.max(sequence, pending.at(-1)?.sequence ?? sequence);
-        if (patch.sequence <= latest) return;
+        if (!isNewerPatch(patch.sequence, pending.at(-1)?.sequence ?? sequence)) return;
         pending.push(patch);
         set({ pendingCount: pending.length });
         requestFrame();
