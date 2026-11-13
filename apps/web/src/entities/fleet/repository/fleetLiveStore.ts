@@ -18,6 +18,7 @@ export interface FleetLiveState {
   sites: Site[];
   config: FleetConfig | null;
   sequence: number | null;
+  instanceId: string | null;
   live: { status: LiveStatus; retryInMs: number | null; lastPatchAt: Date | null };
   isPaused: boolean;
   pendingCount: number;
@@ -29,6 +30,7 @@ export interface FleetLiveState {
   resume: () => void;
   retryLive: () => void;
   setRetryLive: (retry: () => void) => void;
+  beginResync: () => void;
   reset: () => void;
 }
 
@@ -42,6 +44,8 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
   let pending: FleetPatch[] = [];
   let frameRequested = false;
 
+  const initialLive: FleetLiveState['live'] = { status: 'connecting', retryInMs: null, lastPatchAt: null };
+
   return createStore<FleetLiveState>()((set, get) => {
     const initialState = () => ({
       robots: new Map<string, Robot>(),
@@ -49,7 +53,8 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
       sites: [],
       config: null,
       sequence: null,
-      live: { status: 'connecting' as LiveStatus, retryInMs: null, lastPatchAt: null },
+      instanceId: null,
+      live: initialLive,
       isPaused: false,
       pendingCount: 0,
       retryLive: () => undefined,
@@ -75,6 +80,7 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
           sites: snapshot.sites,
           config: snapshot.config,
           sequence: snapshot.sequence,
+          instanceId: snapshot.instanceId,
           pendingCount: pending.length,
         });
         if (pending.length > 0) requestFrame();
@@ -118,6 +124,14 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
 
       setRetryLive(retry) {
         set({ retryLive: retry });
+      },
+
+      // The server restarted: queued patches and the sequence belong to the old run, and a pause cannot hold a fleet
+      // that no longer exists, so both are dropped before the new snapshot arrives.
+      beginResync() {
+        pending = [];
+        frameRequested = false;
+        set({ sequence: null, instanceId: null, pendingCount: 0, isPaused: false });
       },
 
       reset() {

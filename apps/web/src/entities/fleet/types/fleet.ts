@@ -18,6 +18,7 @@ export type SiteMap = SiteMapDto;
 export type LiveStatus = 'connecting' | 'live' | 'reconnecting' | 'offline';
 
 export interface FleetSnapshot {
+  instanceId: string;
   sequence: number;
   generatedAt: Date;
   config: FleetConfig;

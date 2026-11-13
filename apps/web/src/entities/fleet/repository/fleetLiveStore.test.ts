@@ -69,6 +69,20 @@ describe('fleet live store', () => {
     expect(store.getState().isPaused).toBe(false);
   });
 
+  it('drops everything queued from the old server run on resync, ends a pause, and applies the new run', () => {
+    const { store, runFrames } = setup();
+    store.getState().pause();
+    store.getState().queuePatch(toFleetPatch(aPatch(24, [{ id: 'CLN-0142', batteryPercent: 1 }])));
+    store.getState().queuePatch(toFleetPatch(aPatch(37, [{ id: 'CLN-0142', batteryPercent: 2 }])));
+    store.getState().beginResync();
+    expect(store.getState()).toMatchObject({ sequence: null, pendingCount: 0, isPaused: false });
+    store.getState().seed(toFleetSnapshot(aSnapshotDto({ instanceId: 'ingest-run-2', sequence: 20 })));
+    store.getState().queuePatch(toFleetPatch(aPatch(21, [{ id: 'CLN-0142', batteryPercent: 55 }])));
+    runFrames();
+    expect(battery(store, 'CLN-0142')).toBe(55);
+    expect(store.getState()).toMatchObject({ sequence: 21, instanceId: 'ingest-run-2' });
+  });
+
   it('replaces everything when reseeded after a resync, even with a lower sequence', () => {
     const { store } = setup();
     store

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse, ws } from 'msw';
 import { aRobotDto, aSnapshotDto } from '@/test/fleetFixtures';
 import { server } from '@/test/msw';
@@ -14,6 +14,7 @@ function Battery() {
 describe('fleet live connection', () => {
   it('refetches and reseeds the snapshot when the server asks for a resync', async () => {
     let snapshotRequests = 0;
+    const hellos: unknown[] = [];
     const live = ws.link('ws://127.0.0.1:4000/live');
     server.use(
       http.get('*/api/fleet', () => {
@@ -21,11 +22,16 @@ describe('fleet live connection', () => {
         return HttpResponse.json(
           snapshotRequests === 1
             ? aSnapshotDto()
-            : aSnapshotDto({ sequence: 2, robots: [aRobotDto({ batteryPercent: 33 })] }),
+            : aSnapshotDto({
+                instanceId: 'ingest-run-2',
+                sequence: 2,
+                robots: [aRobotDto({ batteryPercent: 33 })],
+              }),
         );
       }),
       live.addEventListener('connection', ({ client }) => {
-        client.addEventListener('message', () => {
+        client.addEventListener('message', (event) => {
+          hellos.push(JSON.parse(String(event.data)));
           if (snapshotRequests === 1) client.send(JSON.stringify({ type: 'resync' }));
         });
       }),
@@ -36,5 +42,9 @@ describe('fleet live connection', () => {
     expect(await screen.findByText('battery 78')).toBeInTheDocument();
     expect(await screen.findByText('battery 33')).toBeInTheDocument();
     expect(snapshotRequests).toBe(2);
+    await waitFor(() => {
+      expect(hellos.at(-1)).toEqual({ type: 'hello', lastSequence: 2, instanceId: 'ingest-run-2' });
+    });
+    expect(hellos[0]).toEqual({ type: 'hello', lastSequence: 10, instanceId: 'ingest-run-1' });
   });
 });

@@ -43,6 +43,7 @@ export const attentionRobotDto = aRobotDto({
 
 export function aSnapshotDto(overrides: Partial<FleetSnapshotDto> = {}): FleetSnapshotDto {
   return {
+    instanceId: 'ingest-run-1',
     sequence: 10,
     generatedAt: '2026-11-13T10:00:00.000Z',
     config: { staleAfterMs: 3000, criticalBatteryPercent: 15, stuckAfterMs: 120_000, patchIntervalMs: 500 },

@@ -43,6 +43,7 @@ export function applyRobotPatch(robot: Robot | undefined, patch: RobotPatchDto):
 
 export function toFleetSnapshot(dto: FleetSnapshotDto): FleetSnapshot {
   return {
+    instanceId: dto.instanceId,
     sequence: dto.sequence,
     generatedAt: new Date(dto.generatedAt),
     config: dto.config,
