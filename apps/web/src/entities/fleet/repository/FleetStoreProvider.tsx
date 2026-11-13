@@ -1,10 +1,10 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { connectFleetLive } from '../adapter/fleetLiveAdapter';
 import { createFleetLiveStore, type FleetLiveStore } from './fleetLiveStore';
-import { fleetSnapshotQueryKey } from './fleetSnapshotQuery';
+import { fleetSnapshotQuery, fleetSnapshotQueryKey } from './fleetSnapshotQuery';
 
 export interface FleetStoreContextValue {
   store: FleetLiveStore;
@@ -29,6 +29,12 @@ export function FleetStoreProvider({ children }: { children: ReactNode }) {
       retryRef.current();
     },
   }));
+
+  // Fleet data is app-wide (the header shows counts on every page), so the provider fetches and seeds it.
+  const snapshot = useQuery(fleetSnapshotQuery());
+  useEffect(() => {
+    if (snapshot.data !== undefined) store.getState().seed(snapshot.data);
+  }, [snapshot.data, store]);
 
   useEffect(() => {
     const flushWhenVisible = () => {

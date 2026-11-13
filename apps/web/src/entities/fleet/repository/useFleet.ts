@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { useStore } from 'zustand';
 import type { Robot } from '@/entities/robot/@x/fleet';
 import { FleetStoreContext, type FleetStoreContextValue } from './FleetStoreProvider';
@@ -18,11 +18,8 @@ const useFleetState = <T>(selector: (state: FleetLiveState) => T): T =>
   useStore(useFleetContext().store, selector);
 
 export function useFleetRepository() {
-  const { store } = useFleetContext();
+  useFleetContext();
   const query = useQuery(fleetSnapshotQuery());
-  useEffect(() => {
-    if (query.data !== undefined) store.getState().seed(query.data);
-  }, [query.data, store]);
   return {
     isLoading: query.isPending,
     error: query.error,
