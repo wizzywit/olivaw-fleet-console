@@ -1,0 +1,22 @@
+{
+  "name": "simulator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "start": "tsx src/cli.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@olivaw/demo-world": "workspace:*",
+    "@olivaw/protocols": "workspace:*",
+    "mqtt": "5.16.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "tsx": "4.23.15",
+    "vitest": "5.0.5"
+  }
+}
