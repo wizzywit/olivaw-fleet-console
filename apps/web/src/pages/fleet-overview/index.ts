@@ -1,1 +1,1 @@
-export { FleetOverviewPage as FleetOverviewRoute } from './ui/FleetOverviewPage/FleetOverviewPage';
+export { FleetOverviewRoute } from './ui/FleetOverviewRoute';
