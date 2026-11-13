@@ -21,14 +21,12 @@ export interface RunningIngest {
   close(): Promise<void>;
 }
 
-const patchLogCapacity = 120;
-
 export async function startIngest(
   config: IngestConfig,
   { log, now = () => new Date() }: IngestDeps,
 ): Promise<RunningIngest> {
   const store = createRobotStore(config.domain, { log });
-  const patchLog = createPatchLog(patchLogCapacity);
+  const patchLog = createPatchLog(config.patchLogCapacity);
   const instanceId = randomUUID();
   const liveHub = createLiveHub(patchLog, instanceId);
   const vda5050 = createVda5050Adapter({ log, now });

@@ -11,7 +11,8 @@ Robots report about once per second. The console needs the whole fleet when it o
 
 - `GET /api/fleet` returns a snapshot: all robots (compact summary), sites, server-computed aggregates, display config, and the current `sequence`.
 - `WS /live` sends patches. Every 500 ms the server drains changed robots, sends only the fields that changed (a robot new since the last patch is sent in full), the updated aggregates, and `sequence + 1`.
-- The client opens the socket with `hello { lastSequence }`. The server replies with the patches it missed from a log of the last 120 patches (one minute), or with `resync` when the client is ahead (the server restarted) or too far behind. On `resync` the client refetches the snapshot.
+- The client opens the socket with `hello { lastSequence, instanceId }`. The server replies with the patches it missed from a log covering the resume window (`RESUME_WINDOW_MS`, one minute: 120 patches at 500 ms), or with `resync` when the client comes from another ingest run (different `instanceId`), is ahead, or is too far behind. On `resync` the client drops queued patches and refetches the snapshot.
+- The server sends a heartbeat every 5 s. The client treats 15 s of silence as a lost connection and reconnects, which catches half-open sockets after sleep or a network change.
 - Patches are broadcast only to sockets that have said hello, so catch-up and live patches never interleave.
 - Summary values are rounded (whole battery percent, 0.1 m, 0.1 m/s), so changes too small to see do not produce patches.
 

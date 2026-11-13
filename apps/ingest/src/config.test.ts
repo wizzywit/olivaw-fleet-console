@@ -13,6 +13,11 @@ describe('loadConfig', () => {
     expect(loadConfig({ REPORT_INTERVAL_MS: '2000' }).domain.staleAfterMs).toBe(6000);
   });
 
+  it('keeps a minute of patches so a client away up to 60 s resumes without a resync', () => {
+    expect(loadConfig({}).patchLogCapacity).toBe(120);
+    expect(loadConfig({ PATCH_INTERVAL_MS: '1000' }).patchLogCapacity).toBe(60);
+  });
+
   it('rejects a non-numeric port', () => {
     expect(() => loadConfig({ HTTP_PORT: 'eighty' })).toThrow();
   });

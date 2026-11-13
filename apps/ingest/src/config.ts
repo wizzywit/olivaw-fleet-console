@@ -11,6 +11,7 @@ const envSchema = z.object({
   PATCH_INTERVAL_MS: z.coerce.number().int().positive().default(500),
   SWEEP_INTERVAL_MS: z.coerce.number().int().positive().default(1000),
   HEARTBEAT_INTERVAL_MS: z.coerce.number().int().positive().default(5000),
+  RESUME_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
 });
 
 export interface IngestConfig {
@@ -20,6 +21,7 @@ export interface IngestConfig {
   patchIntervalMs: number;
   sweepIntervalMs: number;
   heartbeatIntervalMs: number;
+  patchLogCapacity: number;
   domain: DomainConfig;
 }
 
@@ -32,6 +34,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): IngestConfig {
     patchIntervalMs: parsed.PATCH_INTERVAL_MS,
     sweepIntervalMs: parsed.SWEEP_INTERVAL_MS,
     heartbeatIntervalMs: parsed.HEARTBEAT_INTERVAL_MS,
+    // A client that was away for up to the resume window catches up from the log; longer gets a resync.
+    patchLogCapacity: Math.ceil(parsed.RESUME_WINDOW_MS / parsed.PATCH_INTERVAL_MS),
     domain: {
       staleAfterMs: 3 * parsed.REPORT_INTERVAL_MS,
       criticalBatteryPercent: parsed.CRITICAL_BATTERY_PERCENT,

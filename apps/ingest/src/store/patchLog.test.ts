@@ -52,4 +52,14 @@ describe('patch log', () => {
     expect(log.since(0)).toBe('resync');
     expect(sequences(log.since(1))).toEqual([2, 3, 4]);
   });
+
+  it('serves a client exactly one full log behind, and asks one patch further back to resync', () => {
+    const log = createPatchLog(120);
+    appendAll(
+      log,
+      Array.from({ length: 200 }, (_, index) => index + 1),
+    );
+    expect(sequences(log.since(80))).toHaveLength(120);
+    expect(log.since(79)).toBe('resync');
+  });
 });
