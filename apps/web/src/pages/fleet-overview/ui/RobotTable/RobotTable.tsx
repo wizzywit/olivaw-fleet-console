@@ -3,7 +3,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import Link from 'next/link';
 import { useRef, useState, type KeyboardEvent } from 'react';
-import { RobotStatusBadge, robotStatusLabel } from '@/entities/robot';
+import { RobotStatusBadge } from '@/entities/robot';
 import { formatRelativeTime } from '@/shared/lib';
 import { BatteryMeter, KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
@@ -15,11 +15,19 @@ export interface RobotTableProps {
   now: Date;
   onOpen: (href: string) => void;
   onHeldChange: (isHeld: boolean) => void;
+  describeRow: (row: RobotRowView, position: string) => string;
 }
 
 const rowHeight = 52;
 
-export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldChange }: RobotTableProps) {
+export function RobotTable({
+  rows,
+  criticalBatteryPercent,
+  now,
+  onOpen,
+  onHeldChange,
+  describeRow,
+}: RobotTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasFocus, setHasFocus] = useState(false);
@@ -36,7 +44,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
   const activeRow = rows[active];
   const announcement =
     hasFocus && activeRow !== undefined
-      ? `Row ${String(active + 1)} of ${String(rows.length)}: ${activeRow.id}, ${robotStatusLabel(activeRow.status)}, battery ${String(activeRow.batteryPercent)}%`
+      ? describeRow(activeRow, `Row ${String(active + 1)} of ${String(rows.length)}`)
       : '';
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {

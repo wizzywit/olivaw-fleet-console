@@ -79,6 +79,7 @@ export function FleetOverviewPage() {
                   now={overview.now}
                   onOpen={overview.openRobot}
                   onHeldChange={overview.setHeld}
+                  describeRow={overview.describeRow}
                 />
               )}
             </section>

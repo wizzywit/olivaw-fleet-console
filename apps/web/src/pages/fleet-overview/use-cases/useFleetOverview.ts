@@ -24,6 +24,7 @@ import {
 } from '@/entities/robot';
 import { matchesFleetFilter, useFleetFilter } from '@/features/filter-fleet';
 import { formatCount, formatPercent, useNow } from '@/shared/lib';
+import { describeRobot } from '../services/robotDescription';
 import { reconcileOrder } from '../services/stableOrder';
 
 const emptyCounts: StatusCounts = { working: 0, charging: 0, idle: 0, attention: 0, offline: 0 };
@@ -202,6 +203,7 @@ export function useFleetOverview() {
     isLastKnown,
     criticalBatteryPercent: config?.criticalBatteryPercent ?? 15,
     now,
+    describeRow: describeRobot,
     openRobot: (href: string) => {
       router.push(href);
     },
