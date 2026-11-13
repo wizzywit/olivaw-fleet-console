@@ -32,5 +32,5 @@ Practices:
 
 ## Consequences
 
-- 206 tests across the workspace run in seconds.
+- 227 tests across the workspace run in seconds.
 - Playwright end-to-end checks with axe in both themes are planned for tier 3; until then the browser was checked by hand (README).

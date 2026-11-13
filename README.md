@@ -98,7 +98,7 @@ What breaks first with hundreds of thousands of robots, and what I would change:
 
 ## Testing
 
-206 tests: exact-boundary unit tests for every rule, adapter tests against fixtures from the official schemas, an ingest integration test over real MQTT and WebSocket, and React Testing Library journeys with MSW for HTTP and WebSocket ([ADR 0012](docs/adr/0012-testing-strategy.md)). Tests were written first; where one was written after its code, I broke the behavior on purpose to see it fail (the resync handler, the disabled command buttons).
+227 tests: exact-boundary unit tests for every rule, adapter tests against fixtures from the official schemas, an ingest integration test over real MQTT and WebSocket, and React Testing Library journeys with MSW for HTTP and WebSocket ([ADR 0012](docs/adr/0012-testing-strategy.md)). Tests were written first; where one was written after its code, I broke the behavior on purpose to see it fail (the resync handler, the disabled command buttons).
 
 I also ran the whole system in a browser: live updates, filters, the held order, the detail page, and killing and restarting ingest while the console was open. That run found two real bugs that unit tests had missed: a hydration mismatch in the theme toggle and simulated robots not reconnecting after a broker restart. Both are fixed, with a regression test for the first.
 
