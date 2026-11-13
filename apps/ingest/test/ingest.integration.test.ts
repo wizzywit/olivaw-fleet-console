@@ -25,11 +25,11 @@ async function waitFor<T>(probe: () => Promise<T | undefined> | T | undefined, t
   }
 }
 
-function openLive(url: string, lastSequence: number | null) {
+function openLive(url: string, lastSequence: number | null, instanceId: string | null = null) {
   const messages: LiveServerMessage[] = [];
   const socket = new WebSocket(url);
   socket.addEventListener('open', () => {
-    socket.send(JSON.stringify({ type: 'hello', lastSequence }));
+    socket.send(JSON.stringify({ type: 'hello', lastSequence, instanceId }));
   });
   socket.addEventListener('message', (event) => {
     messages.push(liveServerMessageSchema.parse(JSON.parse(String(event.data))));
@@ -48,6 +48,7 @@ describe('ingest service', () => {
       REPORT_INTERVAL_MS: '100',
       PATCH_INTERVAL_MS: '50',
       SWEEP_INTERVAL_MS: '50',
+      HEARTBEAT_INTERVAL_MS: '100',
     });
     ingest = await startIngest(config, { log: () => undefined });
     robot = await mqtt.connectAsync(ingest.mqttUrl, {
@@ -112,6 +113,25 @@ describe('ingest service', () => {
         (message) => message.type === 'patch' && message.robots.some((r) => r.status === 'offline'),
       ),
     );
+    live.socket.close();
+  });
+
+  it('asks a client from another ingest instance to resync even when its sequence is in range', async () => {
+    const fleet = await waitFor(async () => {
+      const snapshot = await getFleet();
+      return snapshot.sequence > 0 ? snapshot : undefined;
+    });
+    const sameInstance = openLive(`${ingest.wsUrl}/live`, 0, fleet.instanceId);
+    const otherInstance = openLive(`${ingest.wsUrl}/live`, 0, 'a-previous-run');
+    expect(await waitFor(() => otherInstance.messages[0])).toEqual({ type: 'resync' });
+    expect(await waitFor(() => sameInstance.messages[0])).toMatchObject({ type: 'patch' });
+    sameInstance.socket.close();
+    otherInstance.socket.close();
+  });
+
+  it('sends heartbeats so clients can tell a quiet connection from a dead one', async () => {
+    const live = openLive(`${ingest.wsUrl}/live`, null);
+    await waitFor(() => live.messages.find((message) => message.type === 'heartbeat'));
     live.socket.close();
   });
 

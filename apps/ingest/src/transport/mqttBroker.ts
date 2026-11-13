@@ -1,5 +1,6 @@
 import { Aedes } from 'aedes';
-import { createServer, type AddressInfo } from 'node:net';
+import { createServer } from 'node:net';
+import { listeningPort } from './listeningPort';
 
 export interface RunningBroker {
   port: number;
@@ -20,7 +21,7 @@ export async function startMqttBroker(
   await new Promise<void>((resolve) => server.listen(port, resolve));
 
   return {
-    port: (server.address() as AddressInfo).port,
+    port: listeningPort(server),
     close: () =>
       new Promise<void>((resolve) => {
         broker.close(() => {

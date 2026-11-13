@@ -1,11 +1,12 @@
 import { sites } from '@olivaw/demo-world';
-import type { AddressInfo } from 'node:net';
+import { randomUUID } from 'node:crypto';
 import type { IngestConfig } from './config';
 import { createVda5050Adapter } from './protocols/vda5050Adapter';
 import { createPatchLog } from './store/patchLog';
 import { createRobotStore } from './store/robotStore';
 import { buildHttpApp } from './transport/httpApp';
 import { createLiveHub } from './transport/liveSocket';
+import { listeningPort } from './transport/listeningPort';
 import { startMqttBroker } from './transport/mqttBroker';
 
 export interface IngestDeps {
@@ -28,7 +29,8 @@ export async function startIngest(
 ): Promise<RunningIngest> {
   const store = createRobotStore(config.domain, { log });
   const patchLog = createPatchLog(patchLogCapacity);
-  const liveHub = createLiveHub(patchLog);
+  const instanceId = randomUUID();
+  const liveHub = createLiveHub(patchLog, instanceId);
   const vda5050 = createVda5050Adapter({ log, now });
 
   const broker = await startMqttBroker(config.mqttPort, (topic, payload) => {
@@ -56,9 +58,13 @@ export async function startIngest(
     liveHub.broadcast(patch);
   }, config.patchIntervalMs);
 
-  const app = await buildHttpApp({ config, store, patchLog, liveHub, sites, now, log });
+  const heartbeatTimer = setInterval(() => {
+    liveHub.broadcast({ type: 'heartbeat' });
+  }, config.heartbeatIntervalMs);
+
+  const app = await buildHttpApp({ config, store, patchLog, liveHub, sites, instanceId, now, log });
   await app.listen({ port: config.httpPort, host: '127.0.0.1' });
-  const httpPort = (app.server.address() as AddressInfo).port;
+  const httpPort = listeningPort(app.server);
 
   return {
     httpUrl: `http://127.0.0.1:${httpPort}`,
@@ -67,6 +73,7 @@ export async function startIngest(
     async close() {
       clearInterval(sweepTimer);
       clearInterval(patchTimer);
+      clearInterval(heartbeatTimer);
       liveHub.closeAll();
       await app.close();
       await broker.close();

@@ -13,17 +13,19 @@ export interface HttpAppDeps {
   patchLog: PatchLog;
   liveHub: LiveHub;
   sites: SiteDto[];
+  instanceId: string;
   now: () => Date;
   log: (message: string, data?: Record<string, unknown>) => void;
 }
 
 export async function buildHttpApp(deps: HttpAppDeps): Promise<FastifyInstance> {
-  const { config, store, patchLog, liveHub, sites, now, log } = deps;
+  const { config, store, patchLog, liveHub, sites, instanceId, now, log } = deps;
   const app = Fastify();
   await app.register(cors, { origin: config.corsOrigin });
   await app.register(websocket);
 
   app.get('/api/fleet', (): FleetSnapshotDto => ({
+    instanceId,
     sequence: patchLog.latestSequence(),
     generatedAt: now().toISOString(),
     config: { ...config.domain, patchIntervalMs: config.patchIntervalMs },

@@ -2,7 +2,7 @@ import { liveClientMessageSchema, type LiveServerMessage } from '@olivaw/contrac
 import type { WebSocket } from '@fastify/websocket';
 import type { PatchLog } from '../store/patchLog';
 
-export function createLiveHub(patchLog: PatchLog) {
+export function createLiveHub(patchLog: PatchLog, instanceId: string) {
   const subscribers = new Set<WebSocket>();
 
   const send = (socket: WebSocket, message: LiveServerMessage) => {
@@ -24,8 +24,9 @@ export function createLiveHub(patchLog: PatchLog) {
           socket.close(1003, 'expected hello');
           return;
         }
-        if (hello.data.lastSequence !== null) {
-          const missed = patchLog.since(hello.data.lastSequence);
+        const { lastSequence, instanceId: clientInstanceId } = hello.data;
+        if (lastSequence !== null) {
+          const missed = clientInstanceId === instanceId ? patchLog.since(lastSequence) : 'resync';
           if (missed === 'resync') {
             send(socket, { type: 'resync' });
           } else {
