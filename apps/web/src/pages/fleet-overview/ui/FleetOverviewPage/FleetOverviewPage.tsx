@@ -68,6 +68,7 @@ export function FleetOverviewPage() {
                 <RobotTable
                   rows={overview.rows}
                   criticalBatteryPercent={overview.criticalBatteryPercent}
+                  now={overview.now}
                   onOpen={overview.openRobot}
                   onHeldChange={overview.setHeld}
                 />

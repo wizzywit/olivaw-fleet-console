@@ -20,7 +20,7 @@ import {
   type RobotStatus,
 } from '@/entities/robot';
 import { matchesFleetFilter, useFleetFilter } from '@/features/filter-fleet';
-import { formatCount, formatPercent, formatRelativeTime, useNow } from '@/shared/lib';
+import { formatCount, formatPercent, useNow } from '@/shared/lib';
 import { countNewInAttention } from '../services/newAttention';
 import { reconcileOrder } from '../services/stableOrder';
 
@@ -55,7 +55,7 @@ export interface RobotRowView {
   isStale: boolean;
   batteryPercent: number;
   charging: boolean;
-  lastReportLabel: string;
+  lastReportAt: Date;
 }
 
 interface OrderState {
@@ -136,7 +136,7 @@ export function useFleetOverview() {
     isStale: isLastKnown || robot.status === 'offline',
     batteryPercent: robot.battery.percent,
     charging: robot.battery.charging,
-    lastReportLabel: formatRelativeTime(robot.lastReportAt, now),
+    lastReportAt: robot.lastReportAt,
   });
 
   const rows = order.flatMap((id) => {
@@ -195,6 +195,7 @@ export function useFleetOverview() {
     setHeld,
     isLastKnown,
     criticalBatteryPercent: config?.criticalBatteryPercent ?? 15,
+    now,
     openRobot: (href: string) => {
       router.push(href);
     },

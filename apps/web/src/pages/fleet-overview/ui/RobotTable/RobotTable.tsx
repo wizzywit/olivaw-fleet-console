@@ -4,6 +4,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import Link from 'next/link';
 import { useRef, useState, type KeyboardEvent } from 'react';
 import { RobotStatusBadge } from '@/entities/robot';
+import { formatRelativeTime } from '@/shared/lib';
 import { BatteryMeter, KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
 import styles from './RobotTable.module.css';
@@ -11,13 +12,14 @@ import styles from './RobotTable.module.css';
 export interface RobotTableProps {
   rows: RobotRowView[];
   criticalBatteryPercent: number;
+  now: Date;
   onOpen: (href: string) => void;
   onHeldChange: (isHeld: boolean) => void;
 }
 
 const rowHeight = 52;
 
-export function RobotTable({ rows, criticalBatteryPercent, onOpen, onHeldChange }: RobotTableProps) {
+export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldChange }: RobotTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const virtualizer = useVirtualizer({
@@ -119,7 +121,7 @@ export function RobotTable({ rows, criticalBatteryPercent, onOpen, onHeldChange 
                       isStale={row.isStale}
                     />
                   </td>
-                  <td className={styles.right}>{row.lastReportLabel}</td>
+                  <td className={styles.right}>{formatRelativeTime(row.lastReportAt, now)}</td>
                 </tr>
               );
             })}
