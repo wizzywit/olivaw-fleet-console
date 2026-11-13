@@ -13,6 +13,7 @@ interface PaletteCommand {
   id: string;
   label: string;
   detail?: string;
+  shortcut?: string;
   run: () => void;
 }
 
@@ -77,7 +78,7 @@ export function useCommandPalette() {
     filterCommands.push({
       id: 'filters:search',
       label: `Search the fleet for "${query.trim()}"`,
-      detail: 'Tab',
+      shortcut: 'Tab',
       run: () => {
         filter.setQuery(query.trim());
       },
@@ -90,7 +91,7 @@ export function useCommandPalette() {
           {
             id: 'view:toggle',
             label: `Switch to ${view.view === 'grid' ? 'table' : 'grid'} view`,
-            detail: 'G',
+            shortcut: 'G',
             run: view.toggleView,
           },
         ]
@@ -132,10 +133,11 @@ export function useCommandPalette() {
     sections: sections.map(({ id, title, commands: items }) => ({
       id,
       title,
-      items: items.map(({ id: itemId, label, detail }) => ({
+      items: items.map(({ id: itemId, label, detail, shortcut }) => ({
         id: itemId,
         label,
         ...(detail === undefined ? {} : { detail }),
+        ...(shortcut === undefined ? {} : { shortcut }),
       })),
     })),
     runCommand: (id: string) => {

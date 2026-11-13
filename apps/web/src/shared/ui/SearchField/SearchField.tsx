@@ -30,7 +30,11 @@ export function SearchField({ label, placeholder, value, onChange, shortcut }: S
       </svg>
       <Input className={clsx(styles.input)} placeholder={placeholder} />
       {shortcut !== undefined && (
-        <Button className={clsx(styles.shortcut)} aria-label={shortcut.label} onPress={shortcut.onPress}>
+        <Button
+          className={clsx(styles.shortcut)} // The name contains the visible keys, so speech users can say what they see (WCAG 2.5.3).
+          aria-label={`${shortcut.label} ${shortcut.keys.join('')}`}
+          onPress={shortcut.onPress}
+        >
           <KeyHint keys={shortcut.keys} />
         </Button>
       )}
