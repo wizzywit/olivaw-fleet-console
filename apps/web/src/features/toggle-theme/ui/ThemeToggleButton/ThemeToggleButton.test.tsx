@@ -20,3 +20,16 @@ describe('ThemeToggleButton', () => {
     expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
   });
 });
+
+describe('ThemeToggleButton hydration', () => {
+  it('renders the server snapshot first, so server and client markup match', async () => {
+    const { renderToString } = await import('react-dom/server');
+    document.documentElement.dataset.theme = 'dark';
+    const html = renderToString(
+      <WithTheme>
+        <ThemeToggleButton />
+      </WithTheme>,
+    );
+    expect(html).toContain('Switch to dark theme');
+  });
+});
