@@ -6,10 +6,13 @@ import { FleetSearchField } from '@/features/filter-fleet';
 import { ThemeToggleButton } from '@/features/toggle-theme';
 import { Button } from '@/shared/ui';
 import { useAppHeader } from '../../use-cases/useAppHeader';
+import { useCommandPalette } from '../../use-cases/useCommandPalette';
+import { CommandPalette } from '../CommandPalette/CommandPalette';
 import styles from './AppHeader.module.css';
 
 export function AppHeader() {
   const header = useAppHeader();
+  const palette = useCommandPalette();
   return (
     <header className={styles.header}>
       <span className={styles.brand}>olivaw</span>
@@ -29,7 +32,9 @@ export function AppHeader() {
         </Link>
       </nav>
       <div className={styles.search}>
-        <FleetSearchField />
+        <FleetSearchField
+          shortcut={{ keys: ['⌘', 'K'], label: 'Open command palette', onPress: palette.open }}
+        />
       </div>
       <span role="status" className={styles.status}>
         <span aria-hidden="true" className={clsx(styles.dot, styles[header.tone])} />
@@ -39,6 +44,7 @@ export function AppHeader() {
         {header.pauseLabel}
       </Button>
       <ThemeToggleButton />
+      <CommandPalette palette={palette} />
     </header>
   );
 }
