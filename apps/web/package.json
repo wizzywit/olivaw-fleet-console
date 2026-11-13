@@ -10,7 +10,7 @@
     "tokens": "tsx scripts/build-tokens.ts",
     "test": "vitest run",
     "typecheck": "next typegen && tsc -p . --noEmit",
-    "lint": "eslint . && steiger ./src && stylelint \"src/**/*.css\""
+    "lint": "next typegen && eslint . && steiger ./src && stylelint \"src/**/*.css\""
   },
   "dependencies": {
     "@olivaw/contracts": "workspace:*",
