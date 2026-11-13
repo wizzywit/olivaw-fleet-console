@@ -30,9 +30,9 @@ describe('StatTile', () => {
         description="Working 180 (97%)"
       />,
     );
-    expect(screen.getByRole('button', { name: /Hotel Isar/ })).toHaveAccessibleDescription(
-      'Working 180 (97%)',
-    );
+    const tile = screen.getByRole('button', { name: /Hotel Isar/ });
+    expect(tile).toHaveAccessibleDescription('Working 180 (97%)');
+    expect(tile).not.toHaveAccessibleName(/Working 180/);
   });
 
   it('shows its tooltip when it gets keyboard focus', async () => {

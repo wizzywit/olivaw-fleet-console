@@ -39,16 +39,24 @@ export function StatTile({
       </span>
       {visual}
       {detail !== undefined && <span className={clsx(styles.detail)}>{detail}</span>}
-      {description !== undefined && <VisuallyHidden id={descriptionId}>{description}</VisuallyHidden>}
     </ToggleButton>
   );
-  if (tooltip === undefined) return tile;
+  // Outside the button, so it is read once as the description and not again as part of the button's name.
+  const hiddenDescription =
+    description === undefined ? null : <VisuallyHidden id={descriptionId}>{description}</VisuallyHidden>;
   return (
-    <TooltipTrigger delay={300} closeDelay={100}>
-      {tile}
-      <Tooltip className={clsx(styles.tooltip)} offset={8} placement="bottom">
-        {tooltip}
-      </Tooltip>
-    </TooltipTrigger>
+    <>
+      {tooltip === undefined ? (
+        tile
+      ) : (
+        <TooltipTrigger delay={300} closeDelay={100}>
+          {tile}
+          <Tooltip className={clsx(styles.tooltip)} offset={8} placement="bottom">
+            {tooltip}
+          </Tooltip>
+        </TooltipTrigger>
+      )}
+      {hiddenDescription}
+    </>
   );
 }
