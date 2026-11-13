@@ -9,7 +9,7 @@
     "start": "next start --port 3000",
     "tokens": "tsx scripts/build-tokens.ts",
     "test": "vitest run",
-    "typecheck": "tsc -p . --noEmit",
+    "typecheck": "next typegen && tsc -p . --noEmit",
     "lint": "eslint . && steiger ./src && stylelint \"src/**/*.css\""
   },
   "dependencies": {
