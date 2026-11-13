@@ -1,0 +1,31 @@
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.value {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+}
+
+.hint {
+  color: var(--text-secondary);
+  font-size: 12px;
+}

@@ -1,0 +1,23 @@
+.panel {
+  padding: 14px var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.code {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  white-space: pre-wrap;
+}
