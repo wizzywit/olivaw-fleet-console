@@ -47,7 +47,11 @@ export function layoutGrid(
 ): GridLayout {
   const columns = Math.max(1, Math.floor((width + gap) / (cell + gap)));
   const bySite = new Map<string, string[]>();
-  for (const row of rows) bySite.set(row.siteId, [...(bySite.get(row.siteId) ?? []), row.id]);
+  for (const row of rows) {
+    const ids = bySite.get(row.siteId);
+    if (ids === undefined) bySite.set(row.siteId, [row.id]);
+    else ids.push(row.id);
+  }
   const knownIds = sites.map((site) => site.id);
   const order = [
     ...knownIds.filter((id) => bySite.has(id)),

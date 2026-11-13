@@ -43,6 +43,18 @@ describe('layoutGrid', () => {
   });
 });
 
+describe('layoutGrid at scale', () => {
+  it('lays out 100,000 robots in linear time', () => {
+    const many = Array.from({ length: 100_000 }, (_, index) => ({
+      id: `R-${String(index)}`,
+      siteId: index % 2 === 0 ? 'airport' : 'hotel',
+    }));
+    const started = performance.now();
+    expect(layoutGrid(many, sites, { ...options, width: 1200 }).cells).toHaveLength(100_000);
+    expect(performance.now() - started).toBeLessThan(500);
+  });
+});
+
 describe('neighbour', () => {
   const layout = layoutGrid(rows, sites, options);
   const at = (index: number) => layout.cells[index]?.id;
