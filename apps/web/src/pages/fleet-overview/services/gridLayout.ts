@@ -20,6 +20,8 @@ export interface GridLayout {
   sections: GridSection[];
   columns: number;
   cell: number;
+  gap: number;
+  width: number;
   height: number;
   // Cell indexes per visual row, top to bottom, for up and down movement.
   rows: number[][];
@@ -83,7 +85,16 @@ export function layoutGrid(
     });
     top = cellsTop + Math.ceil(ids.length / columns) * (cell + gap) + gap;
   });
-  return { cells, sections, columns, cell, height: Math.max(0, top - gap), rows: visualRows };
+  return {
+    cells,
+    sections,
+    columns,
+    cell,
+    gap,
+    width: columns * (cell + gap) - gap,
+    height: Math.max(0, top - gap),
+    rows: visualRows,
+  };
 }
 
 export function neighbour(layout: GridLayout, index: number, direction: GridDirection): number {

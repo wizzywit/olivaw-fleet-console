@@ -155,6 +155,32 @@ describe('fleet overview', () => {
     expect(within(views).getByRole('radio', { name: 'Grid' })).toBeChecked();
   });
 
+  it('shows the grid grouped by site with one tab stop, and announces and opens robots from the keyboard', async () => {
+    navigation.visit('/?view=grid');
+    renderWithProviders(<FleetOverviewPage />);
+    const grid = await screen.findByRole('region', { name: 'Robots grid, grouped by site' });
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(grid).toHaveAttribute('tabindex', '0');
+    await userEvent.click(grid);
+    const announcement = screen.getByTestId('robot-grid-announcement');
+    expect(announcement).toHaveTextContent('Airport T2, 1 of 1: CLN-0142, Working, battery 78%');
+    await userEvent.keyboard('{ArrowDown}');
+    expect(announcement).toHaveTextContent('Hotel Isar, 1 of 1: DLV-0087, Needs attention, battery 12%');
+    await userEvent.keyboard('{Enter}');
+    expect(navigation.push).toHaveBeenCalledWith('/robots/DLV-0087');
+  });
+
+  it('holds the grid order while the user works in it, like the table', async () => {
+    sendOnHello(
+      aPatch(11, [{ id: 'CLN-0142', status: 'attention', attentionReasons: ['stuck'], batteryPercent: 5 }]),
+    );
+    navigation.visit('/?view=grid');
+    renderWithProviders(<FleetOverviewPage />);
+    const grid = await screen.findByRole('region', { name: 'Robots grid, grouped by site' });
+    grid.focus();
+    expect(await screen.findByText(/Order paused while you work/)).toBeInTheDocument();
+  });
+
   it('explains an empty result and clears the filters', async () => {
     navigation.visit('/?q=nothing-matches-this');
     renderWithProviders(<FleetOverviewPage />);

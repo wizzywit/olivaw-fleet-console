@@ -53,6 +53,7 @@ export interface RobotRowView {
   id: string;
   href: string;
   vendorModel: string;
+  siteId: string;
   siteZone: string;
   status: RobotStatus;
   isStale: boolean;
@@ -135,6 +136,7 @@ export function useFleetOverview() {
     id: robot.id,
     href: `/robots/${encodeURIComponent(robot.id)}`,
     vendorModel: `${robot.vendor} ${robot.model}`,
+    siteId: robot.siteId,
     siteZone: [siteName(robot.siteId) ?? robot.siteId, robot.zone].filter(Boolean).join(' · '),
     status: robot.status,
     isStale: isLastKnownValue(robot.status, live.status),
@@ -189,6 +191,7 @@ export function useFleetOverview() {
     retry: repository.refetch,
     siteTiles,
     toggleSite,
+    sites,
     attentionGroups,
     attentionTotal: aggregates?.byStatus.attention ?? 0,
     statusCounts: aggregates?.byStatus ?? emptyCounts,

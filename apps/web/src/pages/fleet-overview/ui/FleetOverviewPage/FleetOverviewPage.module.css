@@ -35,6 +35,10 @@
   gap: var(--space-3);
 }
 
+.viewSwitch {
+  margin-left: auto;
+}
+
 .subtitle {
   margin: 0;
   font-size: 15px;
