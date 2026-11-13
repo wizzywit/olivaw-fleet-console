@@ -1,5 +1,6 @@
 import {
   robotPatchDtoSchema,
+  type AttentionReason,
   type ConnectionState,
   type FleetAggregatesDto,
   type RobotDetailDto,
@@ -8,7 +9,8 @@ import {
 } from '@olivaw/contracts';
 import { siteIdForMap, zoneAt } from '@olivaw/demo-world';
 import { computeAggregates } from '../robot/aggregates';
-import { deriveAttentionReasons } from '../robot/attention';
+import { deriveAttentionReasons, isInAttentionGroup } from '../robot/attention';
+import { createSeenMarks } from '../robot/seenMarks';
 import { deriveStatus } from '../robot/status';
 import type { DomainConfig, RobotObservation, RobotRecord } from '../robot/types';
 
@@ -66,6 +68,8 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
   const records = new Map<string, { record: RobotRecord; siteId: string }>();
   const lastSent = new Map<string, RobotSummaryDto>();
   const touched = new Set<string>();
+  const seenMarks = createSeenMarks();
+  let aggregatesChanged = false;
 
   // Returns whether the derived state moved, so the sweep only queues robots whose status actually changed.
   function recompute(record: RobotRecord, now: Date): boolean {
@@ -77,7 +81,10 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
   }
 
   function aggregates(): FleetAggregatesDto {
-    return computeAggregates([...records.values()].map(({ record }) => record));
+    return computeAggregates(
+      seenMarks,
+      [...records.values()].map(({ record }) => record),
+    );
   }
 
   return {
@@ -121,7 +128,16 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
       }
     },
 
-    drainChanges(): { changed: RobotPatchDto[]; removed: string[] } {
+    // Marks only robots that are members now, so a robot that joined after the operator looked stays unseen.
+    markSeen(reason: AttentionReason, robotIds: readonly string[]): void {
+      const members = robotIds.filter((robotId) => {
+        const record = records.get(robotId)?.record;
+        return record !== undefined && isInAttentionGroup(record, reason);
+      });
+      if (seenMarks.mark(reason, members)) aggregatesChanged = true;
+    },
+
+    drainChanges(): { changed: RobotPatchDto[]; removed: string[]; aggregatesChanged: boolean } {
       const changed: RobotPatchDto[] = [];
       for (const robotId of touched) {
         const entry = records.get(robotId);
@@ -132,7 +148,9 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
         lastSent.set(robotId, summary);
       }
       touched.clear();
-      return { changed, removed: [] };
+      const drained = { changed, removed: [], aggregatesChanged };
+      aggregatesChanged = false;
+      return drained;
     },
 
     aggregates,

@@ -1,6 +1,12 @@
 import cors from '@fastify/cors';
 import websocket from '@fastify/websocket';
-import { robotCommandRequestSchema, type FleetSnapshotDto, type SiteDto } from '@olivaw/contracts';
+import {
+  attentionReasonSchema,
+  robotCommandRequestSchema,
+  seenMarkRequestSchema,
+  type FleetSnapshotDto,
+  type SiteDto,
+} from '@olivaw/contracts';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { IngestConfig } from '../config';
 import type { PatchLog } from '../store/patchLog';
@@ -48,6 +54,14 @@ export async function buildHttpApp(deps: HttpAppDeps): Promise<FastifyInstance> 
       command: command.data.type,
     });
     return reply.code(202).send({ accepted: true });
+  });
+
+  app.post<{ Params: { reason: string } }>('/api/attention-groups/:reason/seen', async (request, reply) => {
+    const reason = attentionReasonSchema.safeParse(request.params.reason);
+    const mark = seenMarkRequestSchema.safeParse(request.body);
+    if (!reason.success || !mark.success) return reply.code(400).send({ error: 'invalid-seen-mark' });
+    store.markSeen(reason.data, mark.data.robotIds);
+    return reply.code(204).send();
   });
 
   app.get('/live', { websocket: true }, (socket) => {

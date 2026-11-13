@@ -38,3 +38,8 @@ export function deriveAttentionReasons(
 ): AttentionReason[] {
   return attentionReasonOrder.filter((reason) => checks[reason](record, now, config));
 }
+
+export const isInAttentionGroup = (
+  record: Pick<RobotRecord, 'status' | 'attentionReasons'>,
+  reason: AttentionReason,
+) => record.status === 'attention' && record.attentionReasons.includes(reason);

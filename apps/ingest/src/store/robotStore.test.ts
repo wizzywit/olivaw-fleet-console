@@ -137,6 +137,16 @@ describe('robot store', () => {
     expect(store.detail('UNKNOWN')).toBeUndefined();
   });
 
+  it('marks only current members seen, and reports the aggregates as changed', () => {
+    store.applyObservation(anObservation({ batteryPercent: 10 }), t(0));
+    store.drainChanges();
+    expect(store.aggregates().attentionGroups[0]?.unseenCount).toBe(1);
+    store.markSeen('battery-critical', ['DLV-0087', 'NOT-A-MEMBER']);
+    expect(store.drainChanges().aggregatesChanged).toBe(true);
+    expect(store.aggregates().attentionGroups[0]?.unseenCount).toBe(0);
+    expect(store.drainChanges().aggregatesChanged).toBe(false);
+  });
+
   it('includes aggregates in the snapshot', () => {
     store.applyObservation(anObservation(), t(0));
     expect(store.snapshot().aggregates.byStatus.working).toBe(1);
