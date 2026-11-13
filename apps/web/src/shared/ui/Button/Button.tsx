@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Button as AriaButton } from 'react-aria-components';
-import { cx } from '../../lib/cx';
+import { clsx } from 'clsx';
 import styles from './Button.module.css';
 
 export interface ButtonProps {
@@ -22,7 +22,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <AriaButton
-      className={cx(styles.button, styles[variant], styles[size])}
+      className={clsx(styles.button, styles[variant], styles[size])}
       isDisabled={isDisabled}
       onPress={onPress}
       {...aria}

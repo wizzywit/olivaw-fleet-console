@@ -1,5 +1,5 @@
 import { Meter } from 'react-aria-components';
-import { cx } from '../../lib/cx';
+import { clsx } from 'clsx';
 import styles from './BatteryMeter.module.css';
 
 export interface BatteryMeterProps {
@@ -19,17 +19,17 @@ export function BatteryMeter({ percent, criticalPercent, charging, isStale = fal
   const isLow = !charging && percent < criticalPercent;
   return (
     <Meter
-      className={cx(styles.meter)}
+      className={clsx(styles.meter)}
       value={percent}
       aria-label={describe(percent, criticalPercent, charging)}
       data-low={isLow}
       data-stale={isStale}
     >
-      <span className={cx(styles.track)} aria-hidden="true">
-        <span className={cx(styles.fill)} style={{ width: `${percent}%` }} />
-        <span className={cx(styles.threshold)} data-threshold style={{ left: `${criticalPercent}%` }} />
+      <span className={clsx(styles.track)} aria-hidden="true">
+        <span className={clsx(styles.fill)} style={{ width: `${percent}%` }} />
+        <span className={clsx(styles.threshold)} data-threshold style={{ left: `${criticalPercent}%` }} />
       </span>
-      <span className={cx(styles.value)} aria-hidden="true">
+      <span className={clsx(styles.value)} aria-hidden="true">
         {percent}%
       </span>
     </Meter>

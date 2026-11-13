@@ -1,5 +1,5 @@
 import { VisuallyHidden } from '../VisuallyHidden/VisuallyHidden';
-import { cx } from '../../lib/cx';
+import { clsx } from 'clsx';
 import styles from './StatusBadge.module.css';
 
 export type StatusTone = 'working' | 'charging' | 'idle' | 'attention' | 'offline';
@@ -21,7 +21,7 @@ export interface StatusBadgeProps {
 
 export function StatusBadge({ tone, label, isStale = false }: StatusBadgeProps) {
   return (
-    <span className={cx(styles.badge, styles[tone])} data-stale={isStale}>
+    <span className={clsx(styles.badge, styles[tone])} data-stale={isStale}>
       <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
         <path d={iconPaths[tone]} fill="currentColor" fillRule="evenodd" />
       </svg>

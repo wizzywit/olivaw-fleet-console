@@ -1,5 +1,5 @@
 import { ToggleButton, ToggleButtonGroup } from 'react-aria-components';
-import { cx } from '../../lib/cx';
+import { clsx } from 'clsx';
 import styles from './ToggleChipGroup.module.css';
 
 export interface ToggleChip {
@@ -20,7 +20,7 @@ export function ToggleChipGroup({ label, items, selectedId, onChange }: ToggleCh
   return (
     <ToggleButtonGroup
       aria-label={label}
-      className={cx(styles.group)}
+      className={clsx(styles.group)}
       selectionMode="single"
       disallowEmptySelection
       selectedKeys={[selectedId]}
@@ -33,10 +33,10 @@ export function ToggleChipGroup({ label, items, selectedId, onChange }: ToggleCh
         <ToggleButton
           key={item.id}
           id={item.id}
-          className={cx(styles.chip, item.tone === 'attention' && styles.attention)}
+          className={clsx(styles.chip, item.tone === 'attention' && styles.attention)}
         >
           {item.label}
-          {item.count !== undefined && <span className={cx(styles.count)}>{item.count}</span>}
+          {item.count !== undefined && <span className={clsx(styles.count)}>{item.count}</span>}
         </ToggleButton>
       ))}
     </ToggleButtonGroup>
