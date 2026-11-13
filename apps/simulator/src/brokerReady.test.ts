@@ -8,7 +8,10 @@ describe('waitForBroker', () => {
   afterEach(async () => {
     await new Promise<void>((resolve) => {
       if (server === undefined) resolve();
-      else server.close(() => resolve());
+      else
+        server.close(() => {
+          resolve();
+        });
     });
     server = undefined;
   });
@@ -18,7 +21,11 @@ describe('waitForBroker', () => {
     await new Promise<void>((resolve) => probe.listen(0, '127.0.0.1', resolve));
     const address = probe.address();
     const port = typeof address === 'object' && address !== null ? address.port : 0;
-    await new Promise<void>((resolve) => probe.close(() => resolve()));
+    await new Promise<void>((resolve) => {
+      probe.close(() => {
+        resolve();
+      });
+    });
 
     const log = vi.fn();
     const ready = waitForBroker(`mqtt://127.0.0.1:${String(port)}`, { retryMs: 20, log });
