@@ -52,10 +52,14 @@ export function RobotTable({
   const paddingBottom = virtualizer.getTotalSize() - ((items.at(-1)?.end ?? headerHeight) - headerHeight);
   const active = Math.min(activeIndex, rows.length - 1);
   const activeRow = rows[active];
-  const announcement =
-    hasFocus && activeRow !== undefined
-      ? describeRow(activeRow, `Row ${String(active + 1)} of ${String(rows.length)}`)
-      : '';
+  // Announced when focus moves, not re-announced when the focused robot's values change under a screen reader.
+  const [announcement, setAnnouncement] = useState('');
+  const announce = (index: number) => {
+    const row = rows[index];
+    setAnnouncement(
+      row === undefined ? '' : describeRow(row, `Row ${String(index + 1)} of ${String(rows.length)}`),
+    );
+  };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const step = { j: 1, ArrowDown: 1, k: -1, ArrowUp: -1 }[event.key];
@@ -63,6 +67,7 @@ export function RobotTable({
       event.preventDefault();
       const next = Math.max(0, Math.min(rows.length - 1, active + step));
       setActiveIndex(next);
+      announce(next);
       virtualizer.scrollToIndex(next);
     } else if (event.key === 'Enter' && activeRow !== undefined) {
       onOpen(activeRow.href);
@@ -79,7 +84,14 @@ export function RobotTable({
         aria-label="Robots, sorted by urgency"
         aria-describedby="robot-table-keys"
         onKeyDown={onKeyDown}
-        {...focusProps}
+        onFocus={() => {
+          focusProps.onFocus();
+          announce(active);
+        }}
+        onBlur={(event) => {
+          focusProps.onBlur(event);
+          if (!event.currentTarget.contains(event.relatedTarget)) setAnnouncement('');
+        }}
       >
         <table className={styles.table} aria-rowcount={rows.length + 1}>
           <caption>

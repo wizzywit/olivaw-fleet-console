@@ -78,6 +78,9 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange, notice }: RobotGr
     setHovered(null);
   });
   const focusIndex = grid.follow(focusedId, lastIndex);
+  // The fallback follows the focused robot, so if it disappears focus lands where it last was, not where a key put it.
+  if (focusIndex >= 0 && focusIndex !== lastIndex) setLastIndex(focusIndex);
+  const [announcement, setAnnouncement] = useState('');
   const { layout, rowAt } = grid;
   const focusedCell = hasFocus ? layout.cells[focusIndex] : undefined;
 
@@ -104,13 +107,19 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange, notice }: RobotGr
     if (cell === undefined) return;
     setFocusedId(cell.id);
     setLastIndex(index);
+    setAnnouncement(grid.describe(index));
+  };
+
+  // Keeps the focused cell visible whenever it moves: by keyboard, or when a re-sort or filter moves the robot.
+  useEffect(() => {
+    const cell = hasFocus ? layout.cells[focusIndex] : undefined;
     const scroll = scrollRef.current;
-    if (scroll === null) return;
+    if (cell === undefined || scroll === null) return;
     const { scrollTop, clientHeight } = scroll;
     if (cell.y < scrollTop) scroll.scrollTop = cell.y - 24;
-    else if (cell.y + grid.layout.cell > scrollTop + clientHeight)
-      scroll.scrollTop = cell.y + grid.layout.cell - clientHeight + 8;
-  };
+    else if (cell.y + layout.cell > scrollTop + clientHeight)
+      scroll.scrollTop = cell.y + layout.cell - clientHeight + 8;
+  }, [focusIndex, hasFocus, layout]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const direction = grid.directionFor(event.key);
@@ -140,7 +149,14 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange, notice }: RobotGr
         aria-label="Robots grid, grouped by site"
         aria-describedby="robot-grid-keys"
         onKeyDown={onKeyDown}
-        {...focusProps}
+        onFocus={() => {
+          focusProps.onFocus();
+          setAnnouncement(grid.describe(focusIndex));
+        }}
+        onBlur={(event) => {
+          focusProps.onBlur(event);
+          if (!event.currentTarget.contains(event.relatedTarget)) setAnnouncement('');
+        }}
       >
         <div ref={contentRef} className={styles.content}>
           <canvas
@@ -193,7 +209,7 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange, notice }: RobotGr
       </div>
       <VisuallyHidden>
         <span role="status" data-testid="robot-grid-announcement">
-          {hasFocus ? grid.describe(focusIndex) : ''}
+          {announcement}
         </span>
       </VisuallyHidden>
       <div className={styles.footer}>

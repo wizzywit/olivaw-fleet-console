@@ -266,6 +266,22 @@ describe('fleet overview', () => {
     expect(await screen.findByText(/Order paused while you work/)).toBeInTheDocument();
   });
 
+  it('announces the focused row when focus moves, not again when its values change', async () => {
+    renderWithProviders(<FleetOverviewPage />);
+    const region = await screen.findByRole('region', { name: 'Robots, sorted by urgency' });
+    await userEvent.click(region);
+    await userEvent.keyboard('j');
+    const announcement = screen.getByTestId('robot-table-announcement');
+    expect(announcement).toHaveTextContent('CLN-0142, Working, battery 78%');
+    liveLink.broadcast(JSON.stringify(aPatch(11, [{ id: 'CLN-0142', batteryPercent: 50 }])));
+    await waitFor(() => {
+      expect(
+        within(rowFor('CLN-0142') ?? document.body).getByRole('meter', { name: 'Battery 50%' }),
+      ).toBeInTheDocument();
+    });
+    expect(announcement).toHaveTextContent('CLN-0142, Working, battery 78%');
+  });
+
   it('explains an empty result and clears the filters', async () => {
     navigation.visit('/?q=nothing-matches-this');
     renderWithProviders(<FleetOverviewPage />);
