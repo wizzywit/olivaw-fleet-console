@@ -22,6 +22,9 @@ export interface RobotTableProps {
 }
 
 const rowHeight = 52;
+// The sticky header sits above the rows inside the scroll box; the virtualizer must know it, or scrolling a row into
+// view stops short by the header's height at the bottom and under the header at the top.
+const headerHeight = 44;
 
 export function RobotTable({
   rows,
@@ -40,11 +43,13 @@ export function RobotTable({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => rowHeight,
+    scrollMargin: headerHeight,
+    scrollPaddingStart: headerHeight,
     overscan: 10,
   });
   const items = virtualizer.getVirtualItems();
-  const paddingTop = items[0]?.start ?? 0;
-  const paddingBottom = virtualizer.getTotalSize() - (items.at(-1)?.end ?? 0);
+  const paddingTop = (items[0]?.start ?? headerHeight) - headerHeight;
+  const paddingBottom = virtualizer.getTotalSize() - ((items.at(-1)?.end ?? headerHeight) - headerHeight);
   const active = Math.min(activeIndex, rows.length - 1);
   const activeRow = rows[active];
   const announcement =
@@ -81,7 +86,7 @@ export function RobotTable({
             <VisuallyHidden>{`${rows.length} robots, sorted by urgency, then battery`}</VisuallyHidden>
           </caption>
           <thead>
-            <tr aria-rowindex={1}>
+            <tr aria-rowindex={1} style={{ height: headerHeight }}>
               <th scope="col">Robot</th>
               <th scope="col">Site</th>
               <th scope="col">Status</th>
