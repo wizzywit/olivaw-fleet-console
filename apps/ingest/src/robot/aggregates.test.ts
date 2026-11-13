@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { aRecord, t } from '../../test/builders';
 import { computeAggregates } from './aggregates';
-import { createSeenMarks } from './seenMarks';
+import { createAcknowledgements } from './acknowledgements';
 
 describe('computeAggregates', () => {
   it('counts every status, per site, including zeros', () => {
-    const aggregates = computeAggregates(createSeenMarks(), [
+    const aggregates = computeAggregates(createAcknowledgements(), [
       aRecord({ robotId: 'A', mapId: 'isar-f4', status: 'working' }),
       aRecord({ robotId: 'B', mapId: 'isar-f4', status: 'offline' }),
       aRecord({ robotId: 'C', mapId: 't2-l0', status: 'charging' }),
@@ -35,7 +35,7 @@ describe('computeAggregates', () => {
   });
 
   it('groups only robots whose status is attention, by reason, largest group first', () => {
-    const aggregates = computeAggregates(createSeenMarks(), [
+    const aggregates = computeAggregates(createAcknowledgements(), [
       aRecord({
         robotId: 'A',
         status: 'attention',
@@ -56,16 +56,23 @@ describe('computeAggregates', () => {
         reason: 'battery-critical',
         priority: 'high',
         count: 2,
-        unseenCount: 2,
+        unacknowledgedCount: 2,
         worstRobotId: 'B',
         robotIds: ['A', 'B'],
       },
-      { reason: 'stuck', priority: 'medium', count: 1, unseenCount: 1, worstRobotId: 'C', robotIds: ['C'] },
+      {
+        reason: 'stuck',
+        priority: 'medium',
+        count: 1,
+        unacknowledgedCount: 1,
+        worstRobotId: 'C',
+        robotIds: ['C'],
+      },
     ]);
   });
 
   it('picks the robot in attention longest as worst for non-battery reasons', () => {
-    const aggregates = computeAggregates(createSeenMarks(), [
+    const aggregates = computeAggregates(createAcknowledgements(), [
       aRecord({
         robotId: 'A',
         status: 'attention',
@@ -83,7 +90,7 @@ describe('computeAggregates', () => {
   });
 
   it('counts a robot with two reasons in both groups', () => {
-    const aggregates = computeAggregates(createSeenMarks(), [
+    const aggregates = computeAggregates(createAcknowledgements(), [
       aRecord({
         robotId: 'A',
         status: 'attention',
@@ -99,7 +106,7 @@ describe('computeAggregates', () => {
   it('sorts high priority groups before larger medium priority groups', () => {
     const stuck = (robotId: string) =>
       aRecord({ robotId, status: 'attention', attentionReasons: ['stuck'], attentionSince: t(0) });
-    const aggregates = computeAggregates(createSeenMarks(), [
+    const aggregates = computeAggregates(createAcknowledgements(), [
       stuck('A'),
       stuck('B'),
       stuck('C'),
@@ -116,14 +123,17 @@ describe('computeAggregates', () => {
     ]);
   });
 
-  it('reports members marked seen, and forgets marks for robots that left every group', () => {
-    const marks = createSeenMarks();
+  it('reports acknowledged members, and forgets robots that left every group', () => {
+    const acknowledgements = createAcknowledgements();
     const stuck = (robotId: string) => aRecord({ robotId, status: 'attention', attentionReasons: ['stuck'] });
-    marks.mark('stuck', ['A', 'B']);
+    acknowledgements.acknowledge('stuck', ['A', 'B']);
     expect(
-      computeAggregates(marks, [stuck('A'), stuck('B'), stuck('C')]).attentionGroups[0]?.unseenCount,
+      computeAggregates(acknowledgements, [stuck('A'), stuck('B'), stuck('C')]).attentionGroups[0]
+        ?.unacknowledgedCount,
     ).toBe(1);
-    computeAggregates(marks, [stuck('C')]);
-    expect(computeAggregates(marks, [stuck('A'), stuck('C')]).attentionGroups[0]?.unseenCount).toBe(2);
+    computeAggregates(acknowledgements, [stuck('C')]);
+    expect(
+      computeAggregates(acknowledgements, [stuck('A'), stuck('C')]).attentionGroups[0]?.unacknowledgedCount,
+    ).toBe(2);
   });
 });

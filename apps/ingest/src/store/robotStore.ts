@@ -10,7 +10,7 @@ import {
 import { siteIdForMap, zoneAt } from '@olivaw/demo-world';
 import { computeAggregates } from '../robot/aggregates';
 import { deriveAttentionReasons, isInAttentionGroup } from '../robot/attention';
-import { createSeenMarks } from '../robot/seenMarks';
+import { createAcknowledgements } from '../robot/acknowledgements';
 import { deriveStatus } from '../robot/status';
 import type { DomainConfig, RobotObservation, RobotRecord } from '../robot/types';
 
@@ -68,7 +68,7 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
   const records = new Map<string, { record: RobotRecord; siteId: string }>();
   const lastSent = new Map<string, RobotSummaryDto>();
   const touched = new Set<string>();
-  const seenMarks = createSeenMarks();
+  const acknowledgements = createAcknowledgements();
   let aggregatesChanged = false;
 
   // Returns whether the derived state moved, so the sweep only queues robots whose status actually changed.
@@ -82,7 +82,7 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
 
   function aggregates(): FleetAggregatesDto {
     return computeAggregates(
-      seenMarks,
+      acknowledgements,
       [...records.values()].map(({ record }) => record),
     );
   }
@@ -128,13 +128,13 @@ export function createRobotStore(config: DomainConfig, { log }: RobotStoreDeps) 
       }
     },
 
-    // Marks only robots that are members now, so a robot that joined after the operator looked stays unseen.
-    markSeen(reason: AttentionReason, robotIds: readonly string[]): void {
+    // Acknowledges only robots that are members now, so a robot that joined after the operator looked stays unacknowledged.
+    acknowledge(reason: AttentionReason, robotIds: readonly string[]): void {
       const members = robotIds.filter((robotId) => {
         const record = records.get(robotId)?.record;
         return record !== undefined && isInAttentionGroup(record, reason);
       });
-      if (seenMarks.mark(reason, members)) aggregatesChanged = true;
+      if (acknowledgements.acknowledge(reason, members)) aggregatesChanged = true;
     },
 
     drainChanges(): { changed: RobotPatchDto[]; removed: string[]; aggregatesChanged: boolean } {

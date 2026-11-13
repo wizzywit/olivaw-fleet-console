@@ -3,7 +3,7 @@ import websocket from '@fastify/websocket';
 import {
   attentionReasonSchema,
   robotCommandRequestSchema,
-  seenMarkRequestSchema,
+  acknowledgeRequestSchema,
   type FleetSnapshotDto,
   type SiteDto,
 } from '@olivaw/contracts';
@@ -56,13 +56,16 @@ export async function buildHttpApp(deps: HttpAppDeps): Promise<FastifyInstance> 
     return reply.code(202).send({ accepted: true });
   });
 
-  app.post<{ Params: { reason: string } }>('/api/attention-groups/:reason/seen', async (request, reply) => {
-    const reason = attentionReasonSchema.safeParse(request.params.reason);
-    const mark = seenMarkRequestSchema.safeParse(request.body);
-    if (!reason.success || !mark.success) return reply.code(400).send({ error: 'invalid-seen-mark' });
-    store.markSeen(reason.data, mark.data.robotIds);
-    return reply.code(204).send();
-  });
+  app.post<{ Params: { reason: string } }>(
+    '/api/attention-groups/:reason/acknowledge',
+    async (request, reply) => {
+      const reason = attentionReasonSchema.safeParse(request.params.reason);
+      const body = acknowledgeRequestSchema.safeParse(request.body);
+      if (!reason.success || !body.success) return reply.code(400).send({ error: 'invalid-acknowledgement' });
+      store.acknowledge(reason.data, body.data.robotIds);
+      return reply.code(204).send();
+    },
+  );
 
   app.get('/live', { websocket: true }, (socket) => {
     liveHub.accept(socket);

@@ -103,7 +103,7 @@ describe('ingest service', () => {
     live.socket.close();
   });
 
-  it('shares a seen mark with every console through a patch, even when no robot changed', async () => {
+  it('shares an acknowledgement with every console through a patch, even when no robot changed', async () => {
     const lowBattery = JSON.stringify({
       ...working,
       headerId: 1300,
@@ -115,11 +115,11 @@ describe('ingest service', () => {
     try {
       const fleet = await waitFor(async () => {
         const snapshot = await getFleet();
-        return snapshot.aggregates.attentionGroups[0]?.unseenCount === 1 ? snapshot : undefined;
+        return snapshot.aggregates.attentionGroups[0]?.unacknowledgedCount === 1 ? snapshot : undefined;
       });
       const live = openLive(`${ingest.wsUrl}/live`, fleet.sequence, fleet.instanceId);
       await waitFor(() => (live.socket.readyState === WebSocket.OPEN ? true : undefined));
-      const marked = await fetch(`${ingest.httpUrl}/api/attention-groups/battery-critical/seen`, {
+      const marked = await fetch(`${ingest.httpUrl}/api/attention-groups/battery-critical/acknowledge`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ robotIds: ['CLN-0142'] }),
@@ -127,7 +127,8 @@ describe('ingest service', () => {
       expect(marked.status).toBe(204);
       await waitFor(() =>
         live.messages.find(
-          (message) => message.type === 'patch' && message.aggregates.attentionGroups[0]?.unseenCount === 0,
+          (message) =>
+            message.type === 'patch' && message.aggregates.attentionGroups[0]?.unacknowledgedCount === 0,
         ),
       );
       live.socket.close();
@@ -136,9 +137,9 @@ describe('ingest service', () => {
     }
   });
 
-  it('rejects a seen mark for an unknown reason or without robot ids', async () => {
+  it('rejects an acknowledgement for an unknown reason or without robot ids', async () => {
     const post = (reason: string, body: unknown) =>
-      fetch(`${ingest.httpUrl}/api/attention-groups/${reason}/seen`, {
+      fetch(`${ingest.httpUrl}/api/attention-groups/${reason}/acknowledge`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),

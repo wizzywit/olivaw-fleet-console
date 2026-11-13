@@ -1,7 +1,7 @@
 import type { AttentionGroupDto, AttentionReason, FleetAggregatesDto, StatusCounts } from '@olivaw/contracts';
 import { siteIdForMap, sites } from '@olivaw/demo-world';
 import { attentionPriority, attentionReasonOrder, isInAttentionGroup } from './attention';
-import type { SeenMarks } from './seenMarks';
+import type { Acknowledgements } from './acknowledgements';
 import type { RobotRecord } from './types';
 
 const emptyCounts = (): StatusCounts => ({ working: 0, charging: 0, idle: 0, attention: 0, offline: 0 });
@@ -16,12 +16,12 @@ function worstOf(reason: AttentionReason, records: RobotRecord[]): RobotRecord {
   });
 }
 
-function groupAttention(marks: SeenMarks, records: RobotRecord[]): AttentionGroupDto[] {
+function groupAttention(acknowledgements: Acknowledgements, records: RobotRecord[]): AttentionGroupDto[] {
   return attentionReasonOrder
     .map((reason) => {
       const members = records.filter((record) => isInAttentionGroup(record, reason));
       const memberIds = members.map((member) => member.robotId);
-      marks.keepOnly(reason, memberIds);
+      acknowledgements.keepOnly(reason, memberIds);
       return { reason, members, memberIds };
     })
     .flatMap(({ reason, members, memberIds }) => {
@@ -31,7 +31,7 @@ function groupAttention(marks: SeenMarks, records: RobotRecord[]): AttentionGrou
           reason,
           priority: attentionPriority[reason],
           count: members.length,
-          unseenCount: marks.unseenIn(reason, memberIds),
+          unacknowledgedCount: acknowledgements.unacknowledgedIn(reason, memberIds),
           worstRobotId: worstOf(reason, members).robotId,
           robotIds: memberIds,
         },
@@ -40,7 +40,10 @@ function groupAttention(marks: SeenMarks, records: RobotRecord[]): AttentionGrou
     .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority] || b.count - a.count);
 }
 
-export function computeAggregates(marks: SeenMarks, records: Iterable<RobotRecord>): FleetAggregatesDto {
+export function computeAggregates(
+  acknowledgements: Acknowledgements,
+  records: Iterable<RobotRecord>,
+): FleetAggregatesDto {
   const all = [...records];
   const byStatus = emptyCounts();
   const bySite: Record<string, StatusCounts> = Object.fromEntries(
@@ -52,5 +55,5 @@ export function computeAggregates(marks: SeenMarks, records: Iterable<RobotRecor
     const siteCounts = siteId === null ? undefined : bySite[siteId];
     if (siteCounts) siteCounts[record.status] += 1;
   }
-  return { byStatus, bySite, attentionGroups: groupAttention(marks, all) };
+  return { byStatus, bySite, attentionGroups: groupAttention(acknowledgements, all) };
 }
