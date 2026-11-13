@@ -1,6 +1,7 @@
 export { Button } from './Button/Button';
 export { StatusBadge } from './StatusBadge/StatusBadge';
 export { ToggleChipGroup, type ToggleChip } from './ToggleChipGroup/ToggleChipGroup';
+export { SegmentedControl, type Segment } from './SegmentedControl/SegmentedControl';
 export { SearchField } from './SearchField/SearchField';
 export { Banner } from './Banner/Banner';
 export { StatTile } from './StatTile/StatTile';
