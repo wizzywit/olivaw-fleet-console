@@ -17,6 +17,7 @@ import {
 import {
   compareByUrgency,
   isBatteryCritical,
+  robotStatusLabel,
   type AttentionPriority,
   type AttentionReason,
   type Robot,
@@ -24,10 +25,19 @@ import {
 } from '@/entities/robot';
 import { matchesFleetFilter, useFleetFilter } from '@/features/filter-fleet';
 import { formatCount, formatPercent, useNow } from '@/shared/lib';
-import { countNewInAttention } from '../services/newAttention';
+import { lastReportLabel } from '../services/lastReport';
+import { describeRobot } from '../services/robotDescription';
 import { reconcileOrder } from '../services/stableOrder';
+import { statusBreakdown } from '../services/statusBreakdown';
 
-const newAttentionWindowMs = 120_000;
+// Every reason keeps its own row in this order, so the panel never changes height or reorders as counts change.
+const attentionSlots: readonly AttentionReason[] = [
+  'emergency-stop',
+  'error-reported',
+  'battery-critical',
+  'stuck',
+];
+
 const emptyCounts: StatusCounts = { working: 0, charging: 0, idle: 0, attention: 0, offline: 0 };
 
 export interface SiteTileView {
@@ -35,24 +45,34 @@ export interface SiteTileView {
   name: string;
   totalLabel: string;
   detail: string;
-  counts: StatusCounts;
+  breakdown: {
+    status: RobotStatus;
+    label: string;
+    count: number;
+    countLabel: string;
+    percentLabel: string;
+  }[];
+  description: string;
   isSelected: boolean;
 }
 
 export interface AttentionGroupView {
   reason: AttentionReason;
-  priority: AttentionPriority;
+  isClear: boolean;
+  priority: AttentionPriority | null;
   count: number;
   countLabel: string;
-  newCount: number;
-  worstHref: string;
-  worstLabel: string;
+  unacknowledgedCount: number;
+  robotIds: readonly string[];
+  worstHref: string | null;
+  worstLabel: string | null;
 }
 
 export interface RobotRowView {
   id: string;
   href: string;
   vendorModel: string;
+  siteId: string;
   siteZone: string;
   status: RobotStatus;
   isStale: boolean;
@@ -135,6 +155,7 @@ export function useFleetOverview() {
     id: robot.id,
     href: `/robots/${encodeURIComponent(robot.id)}`,
     vendorModel: `${robot.vendor} ${robot.model}`,
+    siteId: robot.siteId,
     siteZone: [siteName(robot.siteId) ?? robot.siteId, robot.zone].filter(Boolean).join(' · '),
     status: robot.status,
     isStale: isLastKnownValue(robot.status, live.status),
@@ -149,18 +170,35 @@ export function useFleetOverview() {
     return robot === undefined ? [] : [toRow(robot)];
   });
 
-  const attentionGroups: AttentionGroupView[] = (aggregates?.attentionGroups ?? []).map((group) => {
+  const groupsByReason = new Map((aggregates?.attentionGroups ?? []).map((group) => [group.reason, group]));
+  const attentionGroups: AttentionGroupView[] = attentionSlots.map((reason) => {
+    const group = groupsByReason.get(reason);
+    if (group === undefined) {
+      return {
+        reason,
+        isClear: true,
+        priority: null,
+        count: 0,
+        countLabel: 'Clear',
+        unacknowledgedCount: 0,
+        robotIds: [],
+        worstHref: null,
+        worstLabel: null,
+      };
+    }
     const worst = robots.get(group.worstRobotId);
     const worstLabel =
       worst === undefined
         ? group.worstRobotId
         : `${worst.id} · ${siteName(worst.siteId) ?? worst.siteId}${worst.zone === null ? '' : `, ${worst.zone}`} · battery ${formatPercent(worst.battery.percent)}`;
     return {
-      reason: group.reason,
+      reason,
+      isClear: false,
       priority: group.priority,
       count: group.count,
       countLabel: `${formatCount(group.count)} ${group.count === 1 ? 'robot' : 'robots'}`,
-      newCount: countNewInAttention(group.robotIds, robots, now, newAttentionWindowMs),
+      unacknowledgedCount: group.unacknowledgedCount,
+      robotIds: group.robotIds,
       worstHref: `/robots/${encodeURIComponent(group.worstRobotId)}`,
       worstLabel,
     };
@@ -169,12 +207,22 @@ export function useFleetOverview() {
   const siteTiles: SiteTileView[] = sites.map((site) => {
     const counts = aggregates?.bySite[site.id] ?? emptyCounts;
     const total = totalOf(counts);
+    const breakdown = statusBreakdown(counts).map((share) => ({
+      status: share.status,
+      label: robotStatusLabel(share.status),
+      count: share.count,
+      countLabel: formatCount(share.count),
+      percentLabel: formatPercent(share.percent),
+    }));
     return {
       id: site.id,
       name: site.name,
       totalLabel: `${formatCount(total)} robots`,
       detail: `${formatCount(counts.attention)} need attention · ${formatCount(counts.offline)} offline`,
-      counts,
+      breakdown,
+      description: breakdown
+        .map((entry) => `${entry.label} ${entry.countLabel} (${entry.percentLabel})`)
+        .join(', '),
       isSelected: filter.siteId === site.id,
     };
   });
@@ -188,6 +236,7 @@ export function useFleetOverview() {
     retry: repository.refetch,
     siteTiles,
     toggleSite,
+    sites,
     attentionGroups,
     attentionTotal: aggregates?.byStatus.attention ?? 0,
     statusCounts: aggregates?.byStatus ?? emptyCounts,
@@ -202,6 +251,8 @@ export function useFleetOverview() {
     isLastKnown,
     criticalBatteryPercent: config?.criticalBatteryPercent ?? 15,
     now,
+    describeRow: describeRobot,
+    lastReportLabel,
     openRobot: (href: string) => {
       router.push(href);
     },

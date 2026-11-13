@@ -1,4 +1,4 @@
-import { Input, Label, SearchField as AriaSearchField } from 'react-aria-components';
+import { Button, Input, Label, SearchField as AriaSearchField } from 'react-aria-components';
 import { KeyHint } from '../KeyHint/KeyHint';
 import { clsx } from 'clsx';
 import styles from './SearchField.module.css';
@@ -8,7 +8,7 @@ export interface SearchFieldProps {
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
-  shortcut?: string[];
+  shortcut?: { keys: string[]; label: string; onPress: () => void };
 }
 
 export function SearchField({ label, placeholder, value, onChange, shortcut }: SearchFieldProps) {
@@ -29,7 +29,11 @@ export function SearchField({ label, placeholder, value, onChange, shortcut }: S
         <path d="m20 20-3.5-3.5" />
       </svg>
       <Input className={clsx(styles.input)} placeholder={placeholder} />
-      {shortcut && <KeyHint keys={shortcut} />}
+      {shortcut !== undefined && (
+        <Button className={clsx(styles.shortcut)} aria-label={shortcut.label} onPress={shortcut.onPress}>
+          <KeyHint keys={shortcut.keys} />
+        </Button>
+      )}
     </AriaSearchField>
   );
 }

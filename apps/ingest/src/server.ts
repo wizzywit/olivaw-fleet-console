@@ -43,8 +43,8 @@ export async function startIngest(
   }, config.sweepIntervalMs);
 
   const patchTimer = setInterval(() => {
-    const { changed, removed } = store.drainChanges();
-    if (changed.length === 0 && removed.length === 0) return;
+    const { changed, removed, aggregatesChanged } = store.drainChanges();
+    if (changed.length === 0 && removed.length === 0 && !aggregatesChanged) return;
     const patch = {
       type: 'patch' as const,
       sequence: patchLog.nextSequence(),

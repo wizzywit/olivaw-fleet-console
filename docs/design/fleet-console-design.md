@@ -77,7 +77,7 @@ References: design canvas "Olivaw Fleet Console Directions" (https://claude.ai/a
 
 - Header: product name, main navigation, search with ⌘K hint, live connection status, theme toggle. Navigation has only real destinations: "Fleet" (`/`) and "Needs attention" with its count (`/?status=attention`). Sites are the tiles on the overview, not a separate page. No dead links.
 - Site summary: one tile per site with a status distribution bar and counts. Tiles filter the fleet.
-- "Needs your attention": robots needing attention, grouped by reason. Each group shows its priority (high or medium, set by the server), the required action in plain words, the count, the worst robot, and how many members are new (entered attention in the last 2 minutes). Groups sort by priority, then count. A group that gains members gets one brief highlight, none with `prefers-reduced-motion`.
+- "Needs your attention": robots needing attention, grouped by reason. Each group shows its priority (high or medium, set by the server), the required action in plain words, the count, the worst robot, and how many members nobody has acknowledged yet (shared by every console; tier 2, ADR 0016, replaced the tier 1 "new in the last 2 minutes" count). Groups sort by priority, then count. A group that gains members gets one brief highlight, none with `prefers-reduced-motion`.
 - Robot list as a table (default) or grid (one cell per robot, grouped by site). The view, filters and sort live in the URL so a view can be shared and survives reload.
 - Status filter chips with live counts; text search and filter syntax (`site:`, `status:`, `battery:<20`, `vendor:`).
 - Live behavior: values update in place; ordering changes are held while the user interacts (hover, focus or keyboard in the list) and shown as "Order paused · N updates · Re-sort". A "Pause live updates" control (WCAG 2.2 SC 2.2.2) freezes the screen; resume applies everything received meanwhile, so the screen jumps to the current state. Battery is shown as a bar with the critical threshold marked, plus the number.
@@ -235,7 +235,7 @@ Performance
 Each slice works end to end, has its tests and ADRs, and is committed in small steps before the next one starts. If time runs out, what remains of the last tier moves to the README's "with more time" section instead of shipping half-built.
 
 1. Core: monorepo and tooling (lint, boundaries, commitlint, CI) · design tokens and the `shared/ui` components the core needs · VDA 5050 simulator → ingest (adapter, status rules, stale sweep, in-memory store) → snapshot API and live patches → overview table with site tiles, attention groups (priority, required action, new markers), battery bars with threshold, pause/resume of live updates, filters and search → robot detail (without history) → connection-lost and empty states · unit, adapter and journey tests · ADRs for every decision made in this tier.
-2. Scale: canvas grid view with keyboard navigation · 10,000-robot profile and fixes · command palette · seen/unseen acknowledgement of attention groups · optional fleet map as a secondary view.
+2. Scale: canvas grid view with keyboard navigation · 10,000-robot profile and fixes · command palette · shared acknowledgement of attention groups · optional fleet map as a secondary view.
 3. Depth: MassRobotics second protocol · SQLite history (battery chart, trail, activity) · mobile layout · Playwright end-to-end with axe in both themes.
 
 ## 13. My calls (override any while reviewing)

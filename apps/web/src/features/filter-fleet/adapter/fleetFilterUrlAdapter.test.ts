@@ -1,4 +1,4 @@
-import { fromSearchParams, toSearchParams } from './fleetFilterUrlAdapter';
+import { fromSearchParams, replaceFilterInUrl, toSearchParams } from './fleetFilterUrlAdapter';
 
 describe('fleet filter url adapter', () => {
   it('round-trips filter params through the url', () => {
@@ -15,5 +15,12 @@ describe('fleet filter url adapter', () => {
       rawQuery: '',
     });
     expect(toSearchParams({ status: 'all', siteId: null, rawQuery: '' }).toString()).toBe('');
+  });
+
+  it('keeps parameters it does not own, such as the view', () => {
+    window.history.replaceState(null, '', '/?view=grid&status=offline');
+    replaceFilterInUrl({ status: 'attention', siteId: null, rawQuery: '' });
+    expect(window.location.search).toBe('?view=grid&status=attention');
+    window.history.replaceState(null, '', '/');
   });
 });

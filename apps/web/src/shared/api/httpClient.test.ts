@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 import { server } from '@/test/msw';
-import { HttpError, httpGet, httpPost } from './httpClient';
+import { HttpError, httpGet, httpPost, httpPostNoContent } from './httpClient';
 
 const schema = z.object({ ok: z.literal(true) });
 
@@ -34,6 +34,28 @@ describe('httpPost', () => {
     );
     await expect(httpPost('/api/robots/X/commands', { type: 'pause' }, schema)).resolves.toEqual({
       ok: true,
+    });
+  });
+});
+
+describe('httpPostNoContent', () => {
+  it('sends JSON and accepts an empty 204 reply', async () => {
+    let received: unknown;
+    server.use(
+      http.post('*/api/thing', async ({ request }) => {
+        received = await request.json();
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    await expect(httpPostNoContent('/api/thing', { robotIds: ['A'] })).resolves.toBeUndefined();
+    expect(received).toEqual({ robotIds: ['A'] });
+  });
+
+  it('rejects a non-2xx response with its status', async () => {
+    server.use(http.post('*/api/thing', () => new HttpResponse(null, { status: 400 })));
+    await expect(httpPostNoContent('/api/thing', {})).rejects.toMatchObject({
+      status: 400,
+      reason: 'status',
     });
   });
 });

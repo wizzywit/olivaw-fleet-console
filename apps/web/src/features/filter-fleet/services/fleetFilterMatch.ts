@@ -1,5 +1,6 @@
 import type { Robot } from '@/entities/robot';
 import type { FleetFilter } from '../types/fleetFilter';
+import { parseFleetQuery } from './fleetQuery';
 
 const contains = (haystack: string | null | undefined, needle: string) =>
   haystack?.toLowerCase().includes(needle) ?? false;
@@ -24,4 +25,14 @@ export function matchesFleetFilter(
   const words = query.text.toLowerCase().split(/\s+/).filter(Boolean);
   const searchable = [robot.id, robot.vendor, robot.model, robot.zone, siteName(robot.siteId)];
   return words.every((word) => searchable.some((field) => contains(field, word)));
+}
+
+// The same matching as the fleet search for a typed query on its own (the command palette). The query is parsed once,
+// so matching 10,000 robots per keystroke costs one pass.
+export function fleetSearchMatcher(
+  rawQuery: string,
+  siteName: (siteId: string) => string | undefined,
+): (robot: Robot) => boolean {
+  const filter: FleetFilter = { status: 'all', siteId: null, rawQuery, query: parseFleetQuery(rawQuery) };
+  return (robot) => matchesFleetFilter(robot, filter, siteName);
 }

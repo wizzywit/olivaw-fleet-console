@@ -3,10 +3,11 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import Link from 'next/link';
 import { useRef, useState, type KeyboardEvent } from 'react';
-import { RobotStatusBadge, robotStatusLabel } from '@/entities/robot';
-import { formatRelativeTime } from '@/shared/lib';
+import type { ReactNode } from 'react';
+import { RobotStatusBadge } from '@/entities/robot';
 import { BatteryMeter, KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
+import { useHoldWhileWorking } from '../../use-cases/useHoldWhileWorking';
 import styles from './RobotTable.module.css';
 
 export interface RobotTableProps {
@@ -15,29 +16,50 @@ export interface RobotTableProps {
   now: Date;
   onOpen: (href: string) => void;
   onHeldChange: (isHeld: boolean) => void;
+  notice?: ReactNode;
+  describeRow: (row: RobotRowView, position: string) => string;
+  lastReportLabel: (row: RobotRowView, now: Date) => string;
 }
 
 const rowHeight = 52;
+// The sticky header sits above the rows inside the scroll box; the virtualizer must know it, or scrolling a row into
+// view stops short by the header's height at the bottom and under the header at the top.
+const headerHeight = 44;
 
-export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldChange }: RobotTableProps) {
+export function RobotTable({
+  rows,
+  criticalBatteryPercent,
+  now,
+  onOpen,
+  onHeldChange,
+  describeRow,
+  lastReportLabel,
+  notice,
+}: RobotTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [hasFocus, setHasFocus] = useState(false);
+  const { hasFocus, holdProps, focusProps } = useHoldWhileWorking(onHeldChange);
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => rowHeight,
+    scrollMargin: headerHeight,
+    scrollPaddingStart: headerHeight,
     overscan: 10,
   });
   const items = virtualizer.getVirtualItems();
-  const paddingTop = items[0]?.start ?? 0;
-  const paddingBottom = virtualizer.getTotalSize() - (items.at(-1)?.end ?? 0);
+  const paddingTop = (items[0]?.start ?? headerHeight) - headerHeight;
+  const paddingBottom = virtualizer.getTotalSize() - ((items.at(-1)?.end ?? headerHeight) - headerHeight);
   const active = Math.min(activeIndex, rows.length - 1);
   const activeRow = rows[active];
-  const announcement =
-    hasFocus && activeRow !== undefined
-      ? `Row ${String(active + 1)} of ${String(rows.length)}: ${activeRow.id}, ${robotStatusLabel(activeRow.status)}, battery ${String(activeRow.batteryPercent)}%`
-      : '';
+  // Announced when focus moves, not re-announced when the focused robot's values change under a screen reader.
+  const [announcement, setAnnouncement] = useState('');
+  const announce = (index: number) => {
+    const row = rows[index];
+    setAnnouncement(
+      row === undefined ? '' : describeRow(row, `Row ${String(index + 1)} of ${String(rows.length)}`),
+    );
+  };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const step = { j: 1, ArrowDown: 1, k: -1, ArrowUp: -1 }[event.key];
@@ -45,6 +67,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
       event.preventDefault();
       const next = Math.max(0, Math.min(rows.length - 1, active + step));
       setActiveIndex(next);
+      announce(next);
       virtualizer.scrollToIndex(next);
     } else if (event.key === 'Enter' && activeRow !== undefined) {
       onOpen(activeRow.href);
@@ -52,7 +75,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
   };
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} {...holdProps}>
       <div
         ref={scrollRef}
         className={styles.scroll}
@@ -61,20 +84,13 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
         aria-label="Robots, sorted by urgency"
         aria-describedby="robot-table-keys"
         onKeyDown={onKeyDown}
-        onMouseEnter={() => {
-          onHeldChange(true);
-        }}
-        onMouseLeave={() => {
-          onHeldChange(false);
-        }}
         onFocus={() => {
-          setHasFocus(true);
-          onHeldChange(true);
+          focusProps.onFocus();
+          announce(active);
         }}
         onBlur={(event) => {
-          if (event.currentTarget.contains(event.relatedTarget)) return;
-          setHasFocus(false);
-          onHeldChange(false);
+          focusProps.onBlur(event);
+          if (!event.currentTarget.contains(event.relatedTarget)) setAnnouncement('');
         }}
       >
         <table className={styles.table} aria-rowcount={rows.length + 1}>
@@ -82,7 +98,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
             <VisuallyHidden>{`${rows.length} robots, sorted by urgency, then battery`}</VisuallyHidden>
           </caption>
           <thead>
-            <tr aria-rowindex={1}>
+            <tr aria-rowindex={1} style={{ height: headerHeight }}>
               <th scope="col">Robot</th>
               <th scope="col">Site</th>
               <th scope="col">Status</th>
@@ -128,7 +144,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
                       isStale={row.isStale}
                     />
                   </td>
-                  <td className={styles.right}>{formatRelativeTime(row.lastReportAt, now)}</td>
+                  <td className={styles.right}>{lastReportLabel(row, now)}</td>
                 </tr>
               );
             })}
@@ -148,6 +164,7 @@ export function RobotTable({ rows, criticalBatteryPercent, now, onOpen, onHeldCh
       <p id="robot-table-keys" className={styles.keys}>
         <KeyHint keys={['j', 'k']} /> move · <KeyHint keys={['Enter']} /> open
       </p>
+      {notice}
     </div>
   );
 }

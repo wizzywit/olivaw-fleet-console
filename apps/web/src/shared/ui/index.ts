@@ -1,7 +1,8 @@
 export { Button } from './Button/Button';
 export { StatusBadge } from './StatusBadge/StatusBadge';
 export { ToggleChipGroup, type ToggleChip } from './ToggleChipGroup/ToggleChipGroup';
-export { SearchField } from './SearchField/SearchField';
+export { SegmentedControl, type Segment } from './SegmentedControl/SegmentedControl';
+export { SearchField, type SearchFieldProps } from './SearchField/SearchField';
 export { Banner } from './Banner/Banner';
 export { StatTile } from './StatTile/StatTile';
 export { BatteryMeter } from './BatteryMeter/BatteryMeter';
@@ -10,3 +11,4 @@ export { EmptyState } from './EmptyState/EmptyState';
 export { KeyHint } from './KeyHint/KeyHint';
 export { Skeleton } from './Skeleton/Skeleton';
 export { VisuallyHidden } from './VisuallyHidden/VisuallyHidden';
+export { CommandMenu, type CommandMenuItem, type CommandMenuSection } from './CommandMenu/CommandMenu';

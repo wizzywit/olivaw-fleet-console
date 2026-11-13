@@ -44,6 +44,23 @@ export interface LocationMapView {
   description: string;
 }
 
+const sentLabels: Record<RobotCommandType, string> = {
+  'send-to-dock': 'Sent to dock',
+  pause: 'Pause requested',
+};
+
+// One message at a time for the reserved feedback line: a failure first, then what was sent, then why commands are off.
+function commandFeedback(
+  command: { failed: boolean; sent: RobotCommandType | null },
+  isConnected: boolean,
+): { text: string; isError: boolean } | null {
+  if (command.failed) return { text: 'The command was not accepted. Try again.', isError: true };
+  if (command.sent !== null) return { text: sentLabels[command.sent], isError: false };
+  if (!isConnected)
+    return { text: 'Commands are disabled until the live connection is back', isError: false };
+  return null;
+}
+
 export function useRobotDetail(robotId: string) {
   const robot = useFleetRobot(robotId);
   const sites = useFleetSites();
@@ -62,13 +79,15 @@ export function useRobotDetail(robotId: string) {
   }
 
   const site = sites.find((candidate) => candidate.id === robot.siteId);
-  const map = site?.maps.find((candidate) => candidate.id === robot.position.mapId);
+  const position = detail?.position;
+  const map =
+    position === undefined ? undefined : site?.maps.find((candidate) => candidate.id === position.mapId);
   const firstUrgentError = detail?.errors.find((candidate) => candidate.level !== 'warning');
   const [reason] = robot.attentionReasons;
   const canSend = isLive(live.status) && !command.isPending;
 
   const locationMap: LocationMapView | null =
-    map === undefined
+    map === undefined || position === undefined
       ? null
       : {
           name: `${site?.name ?? robot.siteId} · ${map.name}`,
@@ -80,10 +99,10 @@ export function useRobotDetail(robotId: string) {
           })),
           docks: map.docks.map((dock) => ({ id: dock.id, ...toMapPercent(dock, map) })),
           robot: {
-            ...toMapPercent(robot.position, map),
-            headingDeg: (robot.position.headingRad * 180) / Math.PI,
+            ...toMapPercent(position, map),
+            headingDeg: (position.headingRad * 180) / Math.PI,
           },
-          description: `${map.name} map. The robot is ${robot.zone === null ? 'outside the named zones' : `in ${robot.zone}`}, at x ${robot.position.x} m, y ${robot.position.y} m.`,
+          description: `${map.name} map. The robot is ${robot.zone === null ? 'outside the named zones' : `in ${robot.zone}`}, at x ${position.x} m, y ${position.y} m.`,
         };
 
   return {
@@ -126,7 +145,12 @@ export function useRobotDetail(robotId: string) {
         value: robot.taskId ?? 'None',
         hint: robot.taskId === null ? 'idle' : 'order in progress',
       },
-      { label: 'Last report', value: formatRelativeTime(robot.lastReportAt, now), hint: robot.connection },
+      {
+        label: 'Last report',
+        // The detail refreshes every second with the exact report time; the fleet copy only moves with other changes.
+        value: formatRelativeTime(detail?.rawMessage.receivedAt ?? robot.lastReportAt, now),
+        hint: robot.connection,
+      },
     ],
     locationMap,
     errors:
@@ -149,10 +173,7 @@ export function useRobotDetail(robotId: string) {
           },
     commands: {
       canSend,
-      disabledReason: isLive(live.status) ? null : 'Commands are disabled until the live connection is back',
-      sentLabel:
-        command.sent === null ? null : command.sent === 'send-to-dock' ? 'Sent to dock' : 'Pause requested',
-      failed: command.failed,
+      feedback: commandFeedback(command, isLive(live.status)),
       send: (type: RobotCommandType) => {
         command.send(type);
       },

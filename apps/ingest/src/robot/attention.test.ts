@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { aRecord, t, testConfig } from '../../test/builders';
-import { deriveAttentionReasons } from './attention';
+import { deriveAttentionReasons, isInAttentionGroup } from './attention';
 
 const now = t(0);
 
@@ -59,5 +59,19 @@ describe('deriveAttentionReasons', () => {
       'battery-critical',
       'stuck',
     ]);
+  });
+});
+
+describe('isInAttentionGroup', () => {
+  it('counts a robot in a group only while its status is attention for that reason', () => {
+    expect(isInAttentionGroup(aRecord({ status: 'attention', attentionReasons: ['stuck'] }), 'stuck')).toBe(
+      true,
+    );
+    expect(
+      isInAttentionGroup(aRecord({ status: 'attention', attentionReasons: ['stuck'] }), 'battery-critical'),
+    ).toBe(false);
+    expect(isInAttentionGroup(aRecord({ status: 'offline', attentionReasons: ['stuck'] }), 'stuck')).toBe(
+      false,
+    );
   });
 });

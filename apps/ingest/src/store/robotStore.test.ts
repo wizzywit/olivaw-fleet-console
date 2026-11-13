@@ -33,7 +33,6 @@ describe('robot store', () => {
       attentionSince: null,
       batteryPercent: 64,
       charging: false,
-      position: { x: 41.2, y: 8.7, headingRad: 1.57, mapId: 'isar-f4' },
       speedMps: 0.6,
       operatingMode: 'AUTOMATIC',
       taskId: 'ord-55a1',
@@ -58,12 +57,35 @@ describe('robot store', () => {
     ]);
   });
 
+  it('does not send a robot whose only change is a new report', () => {
+    store.applyObservation(anObservation(), t(0));
+    store.drainChanges();
+    store.applyObservation(anObservation({ receivedAt: t(1000), x: 45 }), t(1000));
+    expect(store.drainChanges().changed).toEqual([]);
+  });
+
+  it('sends the time of the last report when a robot goes silent and turns offline', () => {
+    store.applyObservation(anObservation(), t(0));
+    store.drainChanges();
+    store.applyObservation(anObservation({ receivedAt: t(1000) }), t(1000));
+    store.drainChanges();
+    store.sweep(t(4001));
+    expect(store.drainChanges().changed).toEqual([
+      { id: 'DLV-0087', status: 'offline', lastReportAt: t(1000).toISOString() },
+    ]);
+  });
+
   it('floors battery and rounds motion values so tiny changes do not flood patches', () => {
     store.applyObservation(anObservation({ batteryPercent: 14.97, speedMps: 0.6123, x: 41.234 }), t(0));
     const [robot] = store.drainChanges().changed;
     expect(robot?.batteryPercent).toBe(14);
     expect(robot?.speedMps).toBe(0.6);
-    expect(robot?.position?.x).toBe(41.2);
+    expect(store.detail('DLV-0087')?.position).toEqual({
+      x: 41.2,
+      y: 8.7,
+      headingRad: 1.57,
+      mapId: 'isar-f4',
+    });
   });
 
   it('turns a silent robot offline on the sweep after the stale threshold', () => {
@@ -135,6 +157,30 @@ describe('robot store', () => {
       payload: { headerId: 9 },
     });
     expect(store.detail('UNKNOWN')).toBeUndefined();
+  });
+
+  it('acknowledges only current members, and reports the aggregates as changed', () => {
+    store.applyObservation(anObservation({ batteryPercent: 10 }), t(0));
+    store.drainChanges();
+    expect(store.aggregates().attentionGroups[0]?.unacknowledgedCount).toBe(1);
+    store.acknowledge('battery-critical', ['DLV-0087', 'NOT-A-MEMBER']);
+    expect(store.drainChanges().aggregatesChanged).toBe(true);
+    expect(store.aggregates().attentionGroups[0]?.unacknowledgedCount).toBe(0);
+    expect(store.drainChanges().aggregatesChanged).toBe(false);
+  });
+
+  it('forgets an acknowledgement when the robot leaves the group, even if it is back before the next patch', () => {
+    store.applyObservation(anObservation({ batteryPercent: 10 }), t(0));
+    store.acknowledge('battery-critical', ['DLV-0087']);
+    store.applyObservation(
+      anObservation({ batteryPercent: 10, charging: true, receivedAt: t(1000) }),
+      t(1000),
+    );
+    store.applyObservation(
+      anObservation({ batteryPercent: 10, charging: false, receivedAt: t(2000) }),
+      t(2000),
+    );
+    expect(store.aggregates().attentionGroups[0]?.unacknowledgedCount).toBe(1);
   });
 
   it('includes aggregates in the snapshot', () => {

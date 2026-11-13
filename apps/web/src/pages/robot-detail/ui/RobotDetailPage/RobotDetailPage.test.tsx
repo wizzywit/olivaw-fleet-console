@@ -29,6 +29,7 @@ const snapshot = aSnapshotDto({
 const detail = {
   ...attentionRobotDto,
   serialNumber: 'KC1-22-0087',
+  position: { x: 41.2, y: 8.7, headingRad: 1.57, mapId: 'isar-f4' },
   errors: [{ level: 'warning', code: 'BATTERY_LOW', description: 'Battery below 20%' }],
   rawMessage: { protocol: 'vda5050', receivedAt: '2026-11-13T10:00:00.000Z', payload: { headerId: 88213 } },
 };
@@ -52,6 +53,30 @@ describe('robot detail', () => {
     expect(await screen.findByText(/serial KC1-22-0087/)).toBeInTheDocument();
     const raw = screen.getByText(/Raw message · VDA 5050 3.0/).closest('details');
     expect(raw).not.toHaveAttribute('open');
+  });
+
+  it('moves the robot on the map as the detail refreshes every second', async () => {
+    let requests = 0;
+    server.use(
+      http.get('*/api/robots/DLV-0087', () => {
+        requests += 1;
+        return HttpResponse.json(
+          requests === 1
+            ? detail
+            : {
+                ...detail,
+                position: { ...detail.position, x: 50, y: 9.5 },
+                rawMessage: { ...detail.rawMessage, receivedAt: new Date().toISOString() },
+              },
+        );
+      }),
+    );
+    renderWithProviders(<RobotDetailPage robotId="DLV-0087" />);
+    expect(await screen.findByRole('img', { name: /at x 41.2 m, y 8.7 m/ })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('img', { name: /at x 50 m, y 9.5 m/ }, { timeout: 3000 }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('just now')).toBeInTheDocument();
   });
 
   it('updates in place when the robot goes offline', async () => {
@@ -93,6 +118,25 @@ describe('robot detail', () => {
     await userEvent.click(button);
     expect(await screen.findByText('Sent to dock')).toBeInTheDocument();
     expect(command).toEqual({ type: 'send-to-dock' });
+  });
+
+  it('shows command feedback in a line that is always there, so the page does not jump', async () => {
+    server.use(
+      http.post('*/api/robots/DLV-0087/commands', () =>
+        HttpResponse.json({ accepted: true }, { status: 202 }),
+      ),
+    );
+    renderWithProviders(<RobotDetailPage robotId="DLV-0087" />);
+    const button = await screen.findByRole('button', { name: 'Send to dock' });
+    await waitFor(() => {
+      expect(button).toBeEnabled();
+    });
+    const feedback = screen.getByTestId('command-feedback');
+    expect(feedback).toBeEmptyDOMElement();
+    await userEvent.click(button);
+    await waitFor(() => {
+      expect(feedback).toHaveTextContent('Sent to dock');
+    });
   });
 
   it('disables commands while the live connection is down', async () => {

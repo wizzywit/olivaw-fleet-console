@@ -5,6 +5,7 @@ A live console for a mixed fleet of service robots from different manufacturers:
 ```bash
 pnpm install
 pnpm dev          # ingest on :4000 (MQTT :1883), 1,200 simulated robots, console on http://localhost:3000
+pnpm demo:10k     # the same with 10,000 robots and a production build of the console
 ```
 
 Node 24 and pnpm 12 are required. `pnpm test`, `pnpm lint`, `pnpm typecheck` and `pnpm build` run across the workspace.
@@ -70,6 +71,9 @@ Every significant decision has an ADR in [docs/adr](docs/adr), including the opt
 | [0013](docs/adr/0013-commit-convention.md)                           | Commit convention                                                             |
 | [0014](docs/adr/0014-react-compiler-and-render-performance.md)       | React Compiler and render performance                                         |
 | [0015](docs/adr/0015-theme-from-cookie-and-system-preference.md)     | Theme from a cookie and the system preference                                 |
+| [0016](docs/adr/0016-shared-acknowledgement.md)                      | Shared acknowledgement of attention groups                                    |
+| [0017](docs/adr/0017-command-palette.md)                             | Command palette                                                               |
+| [0018](docs/adr/0018-lean-fleet-stream.md)                           | A lean fleet stream                                                           |
 
 ## What I faked or left out, and why that was the right trade
 
@@ -84,21 +88,45 @@ Every significant decision has an ADR in [docs/adr](docs/adr), including the opt
 The work was planned in vertical slices so that whatever is finished is complete:
 
 1. **Core (done):** everything above.
-2. **Scale (next):** a canvas grid view of the whole fleet with keyboard navigation, a measured 10,000-robot profile, a command palette, seen/unseen acknowledgement of attention groups.
+2. **Scale (done):** a canvas grid view of the whole fleet with keyboard navigation, a measured 10,000-robot profile with fixes, a command palette, shared acknowledgement of attention groups. The optional fleet map was left for later (see below).
 3. **Depth:** MassRobotics as a second protocol, SQLite history (battery chart, trail, activity), mobile layout, Playwright end-to-end tests with axe in both themes.
+
+## Performance at 10,000 robots
+
+Measured with `pnpm demo:10k` (production build, 10,000 simulated robots reporting once a second) in Chromium on an Apple M1 Pro with 32 GB. Long frames are from the Long Animation Frame API; interaction times from the Event Timing API.
+
+Table: Before and after the fixes in ADR 0018 and the grid redraw change.
+
+| Measure                                 | Before                 | After                |
+| --------------------------------------- | ---------------------- | -------------------- |
+| Robots per patch                        | 9,713 of 10,000        | 358                  |
+| Live stream                             | 1,063 KB/s             | 29 KB/s              |
+| Snapshot                                | 4.3 MB, 175 ms         | 3.6 MB, 67 ms        |
+| Table, idle: frames over 33 ms in 10 s  | 10 (about 65 ms each)  | 0 (worst 15 ms)      |
+| Grid, idle: frames over 33 ms in 10 s   | 10 (about 100 ms each) | 1 to 5 (worst 56 ms) |
+| Grid, arrow keys: key events over 16 ms | 63 of 70 (worst 64 ms) | 1 of 70 (40 ms)      |
+| Typing in the search field              | worst 32 ms            | none over 16 ms      |
+
+What the profile found and what changed:
+
+- **Patches carried the whole fleet.** Every report moved `lastReportAt` and every moving robot moved `position`, fields the overview does not show at that rate. Position now comes with the robot detail, and the report time rides along with real changes (ADR 0018).
+- **Moving focus redrew 10,000 cells.** The grid canvas now redraws only when robots, layout or theme change; the focus outline is a separate element on top.
+- **One patch per second, not two.** The simulator publishes all robots in one burst per second, so every second 500 ms window is empty. That is the simulator's rhythm, not ingest falling behind.
+
+The spec's target, input delay under 100 ms at 10,000 robots, holds before and after; the fixes remove the once-a-second long frames and cut the stream by 36 times.
 
 ## At 100×
 
 What breaks first with hundreds of thousands of robots, and what I would change:
 
 - **One process, one event loop.** Move to an external MQTT broker cluster with shared subscriptions and run several ingest instances, sharded by site.
-- **Every console gets every change.** Add per-view subscriptions: the overview gets coalesced summaries, a detail page subscribes to one robot at full rate. Drop position from the fleet stream when no view needs it. Fan out through a pub/sub layer.
+- **Every console gets every change.** Add per-view subscriptions: the overview gets coalesced summaries, a detail page subscribes to one robot at full rate (today it refreshes its detail every second; position already left the fleet stream, ADR 0018). Fan out through a pub/sub layer.
 - **The client holds the whole fleet.** At 100k, filter, sort and page on the server and keep only the visible window on the client.
 - **History in memory.** Use a time-series store with downsampling.
 
 ## Testing
 
-227 tests: exact-boundary unit tests for every rule, adapter tests against fixtures from the official schemas, an ingest integration test over real MQTT and WebSocket, and React Testing Library journeys with MSW for HTTP and WebSocket ([ADR 0012](docs/adr/0012-testing-strategy.md)). Tests were written first; where one was written after its code, I broke the behavior on purpose to see it fail (the resync handler, the disabled command buttons).
+305 tests: exact-boundary unit tests for every rule, adapter tests against fixtures from the official schemas, an ingest integration test over real MQTT and WebSocket, and React Testing Library journeys with MSW for HTTP and WebSocket ([ADR 0012](docs/adr/0012-testing-strategy.md)). Tests were written first; where one was written after its code, I broke the behavior on purpose to see it fail (the resync handler, the disabled command buttons).
 
 I also ran the whole system in a browser: live updates, filters, the held order, the detail page, and killing and restarting ingest while the console was open. That run found two real bugs that unit tests had missed: a hydration mismatch in the theme toggle and simulated robots not reconnecting after a broker restart. Both are fixed, with a regression test for the first.
 
@@ -112,4 +140,4 @@ I used Claude Code as a pair: research (VDA 5050 3.0, Open-RMF, MassRobotics; ev
 
 ## With more time
 
-Tiers 2 and 3 above, then notifications and incident handling, real command execution, authentication and tenants, and an on-prem build (`output: 'standalone'`).
+Tier 3 above; a fleet map as a secondary view, which now needs its own per-site position subscription because positions left the fleet stream (ADR 0018); then notifications and incident handling, real command execution, authentication and tenants, and an on-prem build (`output: 'standalone'`).

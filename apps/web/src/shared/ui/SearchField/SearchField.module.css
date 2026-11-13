@@ -11,7 +11,8 @@
   color: var(--text-muted);
 }
 
-.field:focus-within {
+/* One ring around the whole box while typing; the shortcut button inside draws its own when focused. */
+.field:has(.input:focus) {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
@@ -39,6 +40,29 @@
   font: inherit;
 }
 
+.input:focus-visible {
+  outline: none;
+}
+
 .input::-webkit-search-cancel-button {
   appearance: none;
+}
+
+.shortcut {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  cursor: pointer;
+}
+
+.shortcut[data-hovered] {
+  background: var(--surface-sunken);
+}
+
+.shortcut[data-focus-visible] {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
 }

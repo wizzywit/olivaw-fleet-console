@@ -13,7 +13,6 @@ export function aRobot(overrides: Partial<Robot> = {}): Robot {
     attentionReasons: [],
     attentionSince: null,
     battery: { percent: 78, charging: false },
-    position: { x: 120.4, y: 38.2, headingRad: 1.57, mapId: 't2-l0' },
     speedMps: 0.6,
     operatingMode: 'AUTOMATIC',
     taskId: 'ord-1a2b',

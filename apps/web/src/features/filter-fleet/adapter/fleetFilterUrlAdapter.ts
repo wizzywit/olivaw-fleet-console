@@ -1,4 +1,5 @@
 import { isRobotStatus } from '@/entities/robot';
+import { replaceSearchParams } from '@/shared/lib';
 import type { FleetFilterParams } from '../types/fleetFilter';
 
 export function fromSearchParams(params: URLSearchParams): FleetFilterParams {
@@ -18,8 +19,6 @@ export function toSearchParams({ status, siteId, rawQuery }: FleetFilterParams):
   return params;
 }
 
-// Native replaceState updates the URL and Next's useSearchParams without a router navigation on every keystroke.
-export function replaceFilterInUrl(pathname: string, params: FleetFilterParams): void {
-  const query = toSearchParams(params).toString();
-  window.history.replaceState(null, '', query === '' ? pathname : `${pathname}?${query}`);
+export function replaceFilterInUrl(params: FleetFilterParams): void {
+  replaceSearchParams(['status', 'site', 'q'], toSearchParams(params));
 }

@@ -1,6 +1,7 @@
 import type { AttentionGroupDto, AttentionReason, FleetAggregatesDto, StatusCounts } from '@olivaw/contracts';
 import { siteIdForMap, sites } from '@olivaw/demo-world';
-import { attentionPriority, attentionReasonOrder } from './attention';
+import { attentionPriority, attentionReasonOrder, isInAttentionGroup } from './attention';
+import type { Acknowledgements } from './acknowledgements';
 import type { RobotRecord } from './types';
 
 const emptyCounts = (): StatusCounts => ({ working: 0, charging: 0, idle: 0, attention: 0, offline: 0 });
@@ -15,26 +16,33 @@ function worstOf(reason: AttentionReason, records: RobotRecord[]): RobotRecord {
   });
 }
 
-function groupAttention(records: RobotRecord[]): AttentionGroupDto[] {
-  const inAttention = records.filter((record) => record.status === 'attention');
+function groupAttention(acknowledgements: Acknowledgements, records: RobotRecord[]): AttentionGroupDto[] {
   return attentionReasonOrder
-    .map((reason) => ({ reason, members: inAttention.filter((r) => r.attentionReasons.includes(reason)) }))
-    .flatMap(({ reason, members }) => {
+    .map((reason) => {
+      const members = records.filter((record) => isInAttentionGroup(record, reason));
+      const memberIds = members.map((member) => member.robotId);
+      return { reason, members, memberIds };
+    })
+    .flatMap(({ reason, members, memberIds }) => {
       if (members.length === 0) return [];
       return [
         {
           reason,
           priority: attentionPriority[reason],
           count: members.length,
+          unacknowledgedCount: acknowledgements.unacknowledgedIn(reason, memberIds),
           worstRobotId: worstOf(reason, members).robotId,
-          robotIds: members.map((member) => member.robotId),
+          robotIds: memberIds,
         },
       ];
     })
     .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority] || b.count - a.count);
 }
 
-export function computeAggregates(records: Iterable<RobotRecord>): FleetAggregatesDto {
+export function computeAggregates(
+  acknowledgements: Acknowledgements,
+  records: Iterable<RobotRecord>,
+): FleetAggregatesDto {
   const all = [...records];
   const byStatus = emptyCounts();
   const bySite: Record<string, StatusCounts> = Object.fromEntries(
@@ -46,5 +54,5 @@ export function computeAggregates(records: Iterable<RobotRecord>): FleetAggregat
     const siteCounts = siteId === null ? undefined : bySite[siteId];
     if (siteCounts) siteCounts[record.status] += 1;
   }
-  return { byStatus, bySite, attentionGroups: groupAttention(all) };
+  return { byStatus, bySite, attentionGroups: groupAttention(acknowledgements, all) };
 }

@@ -16,7 +16,6 @@ export function aRobotDto(overrides: Partial<RobotSummaryDto> = {}): RobotSummar
     attentionSince: null,
     batteryPercent: 78,
     charging: false,
-    position: { x: 120.4, y: 38.2, headingRad: 1.57, mapId: 't2-l0' },
     speedMps: 0.6,
     operatingMode: 'AUTOMATIC',
     taskId: 'ord-1a2b',
@@ -37,7 +36,6 @@ export const attentionRobotDto = aRobotDto({
   attentionReasons: ['battery-critical'],
   attentionSince: '2026-11-13T09:58:00.000Z',
   batteryPercent: 12,
-  position: { x: 41.2, y: 8.7, headingRad: 1.57, mapId: 'isar-f4' },
   taskId: 'ord-55a1',
 });
 
@@ -60,6 +58,7 @@ export function aSnapshotDto(overrides: Partial<FleetSnapshotDto> = {}): FleetSn
           reason: 'battery-critical',
           priority: 'high',
           count: 1,
+          unacknowledgedCount: 1,
           worstRobotId: 'DLV-0087',
           robotIds: ['DLV-0087'],
         },

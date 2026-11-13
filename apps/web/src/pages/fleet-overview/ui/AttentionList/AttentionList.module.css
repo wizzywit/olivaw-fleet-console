@@ -12,12 +12,6 @@
   font-weight: 600;
 }
 
-.none {
-  margin: 0;
-  padding: 0 var(--space-5) var(--space-4);
-  color: var(--text-secondary);
-}
-
 .list {
   margin: 0;
   padding: 0;
@@ -25,9 +19,10 @@
 }
 
 .group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
   padding: var(--space-3) var(--space-5);
   border-top: 1px solid var(--row-line);
   transition: background-color 0.3s ease;
@@ -50,11 +45,26 @@
   gap: var(--space-2);
 }
 
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.actionArea {
+  display: flex;
+  justify-content: flex-end;
+
+  /* Fixed, so the button, the Acknowledged label or an error never change the width of the text column. */
+  width: 10rem;
+}
+
 .title {
   font-weight: 600;
 }
 
-.new {
+.unacknowledged {
   padding: 1px 8px;
   border-radius: var(--radius-full);
   background: var(--accent-soft);
@@ -72,4 +82,10 @@
 
 .worst a {
   color: var(--accent-text);
+}
+
+.group[data-clear='true'] .title,
+.group[data-clear='true'] .action,
+.group[data-clear='true'] .worst {
+  color: var(--text-muted);
 }

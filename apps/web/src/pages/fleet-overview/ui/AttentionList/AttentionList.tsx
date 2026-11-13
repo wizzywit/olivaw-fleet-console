@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import type { AttentionReason } from '@/entities/robot';
+import { AcknowledgeButton } from '../AcknowledgeButton/AcknowledgeButton';
 import { PriorityTag } from '@/shared/ui';
 import type { AttentionGroupView } from '../../use-cases/useFleetOverview';
 import styles from './AttentionList.module.css';
@@ -53,27 +54,48 @@ export function AttentionList({ groups, total }: { groups: AttentionGroupView[];
       <h2 id="attention-heading" className={styles.heading}>
         Needs your attention · {total} {total === 1 ? 'robot' : 'robots'}
       </h2>
-      {groups.length === 0 ? (
-        <p className={styles.none}>Nothing needs you right now.</p>
-      ) : (
-        <ul className={styles.list}>
-          {groups.map((group) => (
-            <li key={group.reason} className={styles.group} data-highlighted={highlighted.has(group.reason)}>
+      <ul className={styles.list}>
+        {groups.map((group) => (
+          <li
+            key={group.reason}
+            className={styles.group}
+            data-clear={group.isClear}
+            data-highlighted={highlighted.has(group.reason)}
+          >
+            <div className={styles.text}>
               <div className={styles.summary}>
                 <span className={styles.title}>
                   {copy[group.reason].title} · {group.countLabel}
                 </span>
-                <PriorityTag priority={group.priority} />
-                {group.newCount > 0 && <span className={styles.new}>{group.newCount} new</span>}
+                {group.priority !== null && <PriorityTag priority={group.priority} />}
+                {group.unacknowledgedCount > 0 && (
+                  <span className={styles.unacknowledged}>{group.unacknowledgedCount} unacknowledged</span>
+                )}
               </div>
               <p className={styles.action}>{copy[group.reason].action}</p>
               <p className={styles.worst}>
-                Most urgent: <Link href={group.worstHref}>{group.worstLabel}</Link>
+                {group.worstHref === null ? (
+                  'No robot needs this now.'
+                ) : (
+                  <>
+                    Most urgent: <Link href={group.worstHref}>{group.worstLabel}</Link>
+                  </>
+                )}
               </p>
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+            <div className={styles.actionArea}>
+              {!group.isClear && (
+                <AcknowledgeButton
+                  reason={group.reason}
+                  groupTitle={copy[group.reason].title}
+                  robotIds={group.robotIds}
+                  isAcknowledged={group.unacknowledgedCount === 0}
+                />
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

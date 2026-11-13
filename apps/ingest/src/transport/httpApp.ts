@@ -1,6 +1,12 @@
 import cors from '@fastify/cors';
 import websocket from '@fastify/websocket';
-import { robotCommandRequestSchema, type FleetSnapshotDto, type SiteDto } from '@olivaw/contracts';
+import {
+  attentionReasonSchema,
+  robotCommandRequestSchema,
+  acknowledgeRequestSchema,
+  type FleetSnapshotDto,
+  type SiteDto,
+} from '@olivaw/contracts';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { IngestConfig } from '../config';
 import type { PatchLog } from '../store/patchLog';
@@ -49,6 +55,17 @@ export async function buildHttpApp(deps: HttpAppDeps): Promise<FastifyInstance> 
     });
     return reply.code(202).send({ accepted: true });
   });
+
+  app.post<{ Params: { reason: string } }>(
+    '/api/attention-groups/:reason/acknowledge',
+    async (request, reply) => {
+      const reason = attentionReasonSchema.safeParse(request.params.reason);
+      const body = acknowledgeRequestSchema.safeParse(request.body);
+      if (!reason.success || !body.success) return reply.code(400).send({ error: 'invalid-acknowledgement' });
+      store.acknowledge(reason.data, body.data.robotIds);
+      return reply.code(204).send();
+    },
+  );
 
   app.get('/live', { websocket: true }, (socket) => {
     liveHub.accept(socket);
