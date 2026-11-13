@@ -13,12 +13,14 @@
     "test": "pnpm -r --if-present test",
     "build": "pnpm -r --if-present build",
     "cpd": "jscpd",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "dev": "concurrently --names ingest,simulator,web --prefix-colors blue,magenta,green \"pnpm --filter ingest dev\" \"pnpm --filter simulator dev\" \"pnpm --filter web dev\""
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^10.0.1",
+    "concurrently": "10.0.6",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
