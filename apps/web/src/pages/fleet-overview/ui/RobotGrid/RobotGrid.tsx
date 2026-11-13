@@ -12,6 +12,7 @@ import {
 import { robotStatusLabel, type RobotStatus } from '@/entities/robot';
 import { KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
+import { useHoldWhileWorking } from '../../use-cases/useHoldWhileWorking';
 import { useRobotGrid } from '../../use-cases/useRobotGrid';
 import { drawGrid, readGridColors } from './drawGrid';
 import styles from './RobotGrid.module.css';
@@ -69,8 +70,10 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps)
   const grid = useRobotGrid(rows, sites, width);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [lastIndex, setLastIndex] = useState(0);
-  const [hasFocus, setHasFocus] = useState(false);
   const [hovered, setHovered] = useState<{ index: number; x: number; y: number } | null>(null);
+  const { hasFocus, holdProps } = useHoldWhileWorking(onHeldChange, () => {
+    setHovered(null);
+  });
   const focusIndex = grid.follow(focusedId, lastIndex);
 
   useEffect(() => {
@@ -132,22 +135,7 @@ export function RobotGrid({ rows, sites, onOpen, onHeldChange }: RobotGridProps)
         aria-label="Robots grid, grouped by site"
         aria-describedby="robot-grid-keys"
         onKeyDown={onKeyDown}
-        onMouseEnter={() => {
-          onHeldChange(true);
-        }}
-        onMouseLeave={() => {
-          onHeldChange(false);
-          setHovered(null);
-        }}
-        onFocus={() => {
-          setHasFocus(true);
-          onHeldChange(true);
-        }}
-        onBlur={(event) => {
-          if (event.currentTarget.contains(event.relatedTarget)) return;
-          setHasFocus(false);
-          onHeldChange(false);
-        }}
+        {...holdProps}
       >
         <div ref={contentRef} className={styles.content}>
           <canvas

@@ -7,6 +7,7 @@ import { RobotStatusBadge } from '@/entities/robot';
 import { formatRelativeTime } from '@/shared/lib';
 import { BatteryMeter, KeyHint, VisuallyHidden } from '@/shared/ui';
 import type { RobotRowView } from '../../use-cases/useFleetOverview';
+import { useHoldWhileWorking } from '../../use-cases/useHoldWhileWorking';
 import styles from './RobotTable.module.css';
 
 export interface RobotTableProps {
@@ -30,7 +31,7 @@ export function RobotTable({
 }: RobotTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [hasFocus, setHasFocus] = useState(false);
+  const { hasFocus, holdProps } = useHoldWhileWorking(onHeldChange);
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
@@ -69,21 +70,7 @@ export function RobotTable({
         aria-label="Robots, sorted by urgency"
         aria-describedby="robot-table-keys"
         onKeyDown={onKeyDown}
-        onMouseEnter={() => {
-          onHeldChange(true);
-        }}
-        onMouseLeave={() => {
-          onHeldChange(false);
-        }}
-        onFocus={() => {
-          setHasFocus(true);
-          onHeldChange(true);
-        }}
-        onBlur={(event) => {
-          if (event.currentTarget.contains(event.relatedTarget)) return;
-          setHasFocus(false);
-          onHeldChange(false);
-        }}
+        {...holdProps}
       >
         <table className={styles.table} aria-rowcount={rows.length + 1}>
           <caption>
