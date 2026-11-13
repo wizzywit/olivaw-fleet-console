@@ -23,6 +23,12 @@ describe('buildTokensCss', () => {
     expect(block(css, '[data-theme="dark"]')).toContain('--accent: #8b93ff;');
   });
 
+  it('follows the system dark preference when the user has not chosen a theme', () => {
+    const media = css.slice(css.indexOf('@media (prefers-color-scheme: dark)'));
+    expect(media).toContain(':root:not([data-theme]) {');
+    expect(media).toContain('--accent: #8b93ff;');
+  });
+
   it('turns aliases into variable references', () => {
     expect(css).toContain('--focus-ring: var(--accent);');
   });

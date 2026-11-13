@@ -18,6 +18,20 @@ if (typeof Element !== 'undefined') {
   });
 }
 
+// jsdom has no media queries either; tests run as a light-scheme system unless a test stubs matchMedia itself.
+if (typeof window !== 'undefined') {
+  window.matchMedia = (query: string) => {
+    const list: MediaQueryList = Object.assign(new EventTarget(), {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+    });
+    return list;
+  };
+}
+
 beforeAll(() => {
   server.listen({ onUnhandledFrame: 'error' });
 });

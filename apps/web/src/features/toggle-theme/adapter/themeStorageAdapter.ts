@@ -1,23 +1,21 @@
-import { themeStorageKey, type Theme } from '../types/theme';
+import { themeCookieName, type Theme } from '../types/theme';
 
-const isTheme = (value: string | null): value is Theme => value === 'light' || value === 'dark';
+const oneYearInSeconds = 60 * 60 * 24 * 365;
+const systemDarkQuery = '(prefers-color-scheme: dark)';
 
-export function readPreferredTheme(): Theme {
-  try {
-    const stored = localStorage.getItem(themeStorageKey);
-    if (isTheme(stored)) return stored;
-  } catch {
-    // Storage can be blocked (private mode, policies); fall through to the system preference.
-  }
-  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const isTheme = (value: string | undefined): value is Theme => value === 'light' || value === 'dark';
+
+export interface CookieReader {
+  get(name: string): { value: string } | undefined;
+}
+
+export function readThemeCookie(cookies: CookieReader): Theme | null {
+  const value = cookies.get(themeCookieName)?.value;
+  return isTheme(value) ? value : null;
 }
 
 export function storeTheme(theme: Theme): void {
-  try {
-    localStorage.setItem(themeStorageKey, theme);
-  } catch {
-    // Not persisting is acceptable; the theme still applies for this visit.
-  }
+  document.cookie = `${themeCookieName}=${theme}; Path=/; Max-Age=${String(oneYearInSeconds)}; SameSite=Lax`;
 }
 
 export function applyTheme(theme: Theme): void {
@@ -25,6 +23,15 @@ export function applyTheme(theme: Theme): void {
 }
 
 export function readAppliedTheme(): Theme {
-  const applied = document.documentElement.dataset.theme ?? null;
-  return isTheme(applied) ? applied : 'light';
+  const applied = document.documentElement.dataset.theme;
+  if (isTheme(applied)) return applied;
+  return matchMedia(systemDarkQuery).matches ? 'dark' : 'light';
+}
+
+export function subscribeToSystemTheme(listener: () => void): () => void {
+  const query = matchMedia(systemDarkQuery);
+  query.addEventListener('change', listener);
+  return () => {
+    query.removeEventListener('change', listener);
+  };
 }

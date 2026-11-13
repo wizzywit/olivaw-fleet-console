@@ -1,3 +1,3 @@
 export type Theme = 'light' | 'dark';
 
-export const themeStorageKey = 'olivaw-theme';
+export const themeCookieName = 'olivaw-theme';

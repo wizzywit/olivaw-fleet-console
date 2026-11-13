@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import { useFleetLiveSync } from '@/entities/fleet';
-import { ThemeContext, useThemeController } from '@/features/toggle-theme';
+import { ThemeContext, useThemeController, type Theme } from '@/features/toggle-theme';
 
 function FleetLiveSync() {
   useFleetLiveSync();
@@ -18,12 +18,18 @@ function FleetLiveSync() {
 export interface ProvidersProps {
   children: ReactNode;
   dehydratedState?: DehydratedState;
+  theme?: Theme | null;
   queryClient?: QueryClient;
 }
 
-export function Providers({ children, dehydratedState, queryClient: providedClient }: ProvidersProps) {
+export function Providers({
+  children,
+  dehydratedState,
+  theme: serverTheme = null,
+  queryClient: providedClient,
+}: ProvidersProps) {
   const [queryClient] = useState(() => providedClient ?? new QueryClient());
-  const theme = useThemeController();
+  const theme = useThemeController(serverTheme);
   return (
     <QueryClientProvider client={queryClient}>
       <HydrationBoundary state={dehydratedState}>

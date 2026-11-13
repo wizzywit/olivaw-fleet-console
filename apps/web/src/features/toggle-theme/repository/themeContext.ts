@@ -1,7 +1,12 @@
 'use client';
 
 import { createContext, useContext, useSyncExternalStore } from 'react';
-import { applyTheme, readAppliedTheme, storeTheme } from '../adapter/themeStorageAdapter';
+import {
+  applyTheme,
+  readAppliedTheme,
+  storeTheme,
+  subscribeToSystemTheme,
+} from '../adapter/themeStorageAdapter';
 import type { Theme } from '../types/theme';
 
 export interface ThemeContextValue {
@@ -14,13 +19,17 @@ export const ThemeContext = createContext<ThemeContextValue | null>(null);
 const listeners = new Set<() => void>();
 const subscribe = (listener: () => void) => {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  const unsubscribeSystem = subscribeToSystemTheme(listener);
+  return () => {
+    listeners.delete(listener);
+    unsubscribeSystem();
+  };
 };
 
-// The server cannot know the theme, so it renders the light snapshot; React then switches to the applied
-// theme after hydration without a mismatch. Colours never flash: CSS reads data-theme set by the bootstrap script.
-export function useThemeController(): ThemeContextValue {
-  const theme = useSyncExternalStore(subscribe, readAppliedTheme, () => 'light' as const);
+// The server renders the theme from the request cookie. Without a cookie it assumes light while CSS already
+// follows the system preference, and React switches the toggle to the real theme right after hydration.
+export function useThemeController(serverTheme: Theme | null): ThemeContextValue {
+  const theme = useSyncExternalStore(subscribe, readAppliedTheme, () => serverTheme ?? 'light');
   return {
     theme,
     setTheme: (next) => {

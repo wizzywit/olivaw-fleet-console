@@ -54,6 +54,12 @@ export function buildTokensCss(input: unknown): string {
     '/* Generated from design/tokens.json by scripts/build-tokens.ts. Do not edit by hand. */',
     `:root, [data-theme="${firstTheme.id}"] {\n${themeBlock(firstTheme.id)}\n}`,
     ...otherThemes.map((theme) => `[data-theme="${theme.id}"] {\n${themeBlock(theme.id)}\n}`),
+    ...otherThemes
+      .filter((theme) => theme.id === 'dark')
+      .map(
+        (theme) =>
+          `@media (prefers-color-scheme: dark) {\n:root:not([data-theme]) {\n${themeBlock(theme.id)}\n}\n}`,
+      ),
     `:root {\n${declarations([...plain, ...fonts])}\n}`,
     '',
   ].join('\n\n');

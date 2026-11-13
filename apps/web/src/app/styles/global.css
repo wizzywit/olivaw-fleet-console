@@ -2,6 +2,10 @@
   --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, sfmono-regular, menlo, monospace;
 
+  color-scheme: light dark;
+}
+
+[data-theme='light'] {
   color-scheme: light;
 }
 

@@ -69,6 +69,7 @@ Every significant decision has an ADR in [docs/adr](docs/adr), including the opt
 | [0012](docs/adr/0012-testing-strategy.md)                            | Testing strategy                                                              |
 | [0013](docs/adr/0013-commit-convention.md)                           | Commit convention                                                             |
 | [0014](docs/adr/0014-react-compiler-and-render-performance.md)       | React Compiler and render performance                                         |
+| [0015](docs/adr/0015-theme-from-cookie-and-system-preference.md)     | Theme from a cookie and the system preference                                 |
 
 ## What I faked or left out, and why that was the right trade
 

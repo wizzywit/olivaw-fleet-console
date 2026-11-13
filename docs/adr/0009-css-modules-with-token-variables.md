@@ -9,7 +9,7 @@ The design system (`design/tokens.json`) defines colors for light and dark theme
 
 ## Decision
 
-- `scripts/build-tokens.ts` generates `src/app/styles/tokens.css` from `design/tokens.json`: light values on `:root, [data-theme="light"]`, dark overrides on `[data-theme="dark"]`, aliases such as `{accent}` as `var(--accent)`.
+- `scripts/build-tokens.ts` generates `src/app/styles/tokens.css` from `design/tokens.json`: light values on `:root, [data-theme="light"]`, dark overrides on `[data-theme="dark"]` and, when no theme is chosen, under `prefers-color-scheme: dark` (ADR 0015), aliases such as `{accent}` as `var(--accent)`.
 - Components use CSS Modules, one stylesheet next to each component in its own folder, reading only these variables. Stylelint forbids hex and named colors in `*.module.css`.
 - Switching theme changes one attribute on `<html>`; no component re-renders.
 
