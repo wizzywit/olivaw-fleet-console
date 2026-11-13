@@ -67,6 +67,7 @@ export function createFleet(count: number, seed: number): SimRobot[] {
         errors: [],
         recoverAtMs: null,
         dropoutUntilMs: null,
+        hasReported: false,
       });
     }
   }
