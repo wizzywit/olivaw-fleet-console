@@ -27,4 +27,4 @@ The console re-renders often: patches arrive every 500 ms, relative times tick e
 
 - Fewer manual memo hooks to review.
 - Tests run without the compiler (Vitest transforms without the Babel plugin); the production build and lint cover compiler compatibility.
-- Tier 2 measures 10,000 robots with the React profiler and records the numbers in the README.
+- The 10,000-robot measurements and the fixes they led to are in the README ("Performance at 10,000 robots") and ADR 0018.

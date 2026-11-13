@@ -14,7 +14,7 @@ Robots report about once per second. The console needs the whole fleet when it o
 - The client opens the socket with `hello { lastSequence, instanceId }`. The server replies with the patches it missed from a log covering the resume window (`RESUME_WINDOW_MS`, one minute: 120 patches at 500 ms), or with `resync` when the client comes from another ingest run (different `instanceId`), is ahead, or is too far behind. On `resync` the client drops queued patches and refetches the snapshot.
 - The server sends a heartbeat every 5 s. The client treats 15 s of silence as a lost connection and reconnects, which catches half-open sockets after sleep or a network change.
 - Patches are broadcast only to sockets that have said hello, so catch-up and live patches never interleave.
-- Summary values are rounded (whole battery percent, 0.1 m, 0.1 m/s), so changes too small to see do not produce patches.
+- Summary values are rounded (whole battery percent, 0.1 m/s), so changes too small to see do not produce patches. Position is not in the summary and the report time rides along with real changes (ADR 0018).
 
 ## Options considered
 
@@ -27,4 +27,4 @@ Robots report about once per second. The console needs the whole fleet when it o
 
 - The patch rate is bounded by robots that changed, not messages received.
 - A restarted server is detected (`resync`) instead of silently corrupting client state.
-- Next steps at 100×: per-view subscriptions (the detail page subscribes to one robot at full rate, the overview to coalesced summaries), dropping position from the fleet stream when no view needs it, binary encoding, and fan-out through a pub/sub layer when ingest runs as several instances.
+- Next steps at 100×: per-view subscriptions (the detail page subscribes to one robot at full rate instead of refreshing its detail every second, the overview to coalesced summaries), binary encoding, and fan-out through a pub/sub layer when ingest runs as several instances.
