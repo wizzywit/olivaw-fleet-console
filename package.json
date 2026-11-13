@@ -14,7 +14,8 @@
     "build": "pnpm -r --if-present build",
     "cpd": "jscpd",
     "format": "prettier --write .",
-    "dev": "concurrently --names ingest,simulator,web --prefix-colors blue,magenta,green \"pnpm --filter ingest dev\" \"pnpm --filter simulator dev\" \"pnpm --filter web dev\""
+    "dev": "concurrently --names ingest,simulator,web --prefix-colors blue,magenta,green \"pnpm --filter ingest dev\" \"pnpm --filter simulator dev\" \"pnpm --filter web dev\"",
+    "demo:10k": "pnpm --filter web build && concurrently --names ingest,simulator,web --prefix-colors blue,magenta,green \"pnpm --filter ingest dev\" \"pnpm --filter simulator dev --robots 10000\" \"pnpm --filter web start\""
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
