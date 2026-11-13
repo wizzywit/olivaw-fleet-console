@@ -5,8 +5,24 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-config-prettier';
 import tseslint from 'typescript-eslint';
 
-const sliceLayers = '{pages,widgets,features,entities}';
-const segment = (name) => ({ type: name, pattern: `src/${sliceLayers}/*/${name}` });
+const slicedLayers = 'pages|widgets|features|entities';
+const segments = ['ui', 'use-cases', 'repository', 'services', 'adapter', 'types'];
+const segment = (name) => ({
+  type: name,
+  pattern: `src/(${slicedLayers})/(*)/${name}`,
+  capture: ['layer', 'slice'],
+});
+const sameSlice = { layer: '{{ from.captured.layer }}', slice: '{{ from.captured.slice }}' };
+const toOwnSlice = (...list) => ({ to: { element: { types: { anyOf: list }, captured: sameSlice } } });
+const lowerLayers = {
+  pages: 'widgets|features|entities',
+  widgets: 'features|entities',
+  features: 'entities',
+};
+const toLowerPublicApi = (layer) => ({
+  from: { element: { types: { anyOf: segments }, captured: { layer } } },
+  allow: { to: { element: { type: 'public-api', captured: { layer: `(${lowerLayers[layer]})` } } } },
+});
 const stateLibraries = {
   zustand: { name: 'zustand', message: 'Client state lives in a repository/ segment.' },
   query: { name: '@tanstack/react-query', message: 'Server state lives in a repository/ segment.' },
@@ -40,14 +56,10 @@ export default tseslint.config(
       'boundaries/include': ['src/**/*'],
       'boundaries/elements': [
         { type: 'app', pattern: 'src/app' },
-        segment('ui'),
-        segment('use-cases'),
-        segment('repository'),
-        segment('services'),
-        segment('adapter'),
-        segment('types'),
-        { type: 'public-api', pattern: `src/${sliceLayers}/*/index.ts` },
-        { type: 'cross-entity-api', pattern: 'src/entities/*/@x/*.ts' },
+        ...segments.map(segment),
+        { type: 'cross-entity-api', pattern: 'src/entities/(*)/@x', capture: ['slice'] },
+        // Matched after the segments, so only files directly in the slice folder (its index.ts) land here.
+        { type: 'public-api', pattern: `src/(${slicedLayers})/(*)`, capture: ['layer', 'slice'] },
         { type: 'shared-ui', pattern: 'src/shared/ui' },
         { type: 'shared-api', pattern: 'src/shared/api' },
         { type: 'shared-lib', pattern: 'src/shared/lib' },
@@ -62,50 +74,43 @@ export default tseslint.config(
           default: 'disallow',
           policies: [
             { from: { element: { type: 'app' } }, allow: { to: { element: { type: '*' } } } },
-            {
-              from: { element: { type: 'public-api' } },
-              allow: types('ui', 'use-cases', 'repository', 'services', 'types'),
-            },
-            { from: { element: { type: 'cross-entity-api' } }, allow: types('types', 'services') },
-            {
-              from: { element: { type: 'ui' } },
-              allow: types(
-                'ui',
-                'use-cases',
-                'types',
-                'public-api',
-                'shared-ui',
-                'shared-lib',
-                'shared-config',
-              ),
-            },
+            { from: { element: { type: 'public-api' } }, allow: toOwnSlice(...segments) },
+            { from: { element: { type: 'ui' } }, allow: toOwnSlice('ui', 'use-cases', 'types') },
             {
               from: { element: { type: 'use-cases' } },
-              allow: types('services', 'repository', 'types', 'public-api', 'shared-lib', 'shared-config'),
+              allow: toOwnSlice('services', 'repository', 'types'),
             },
             {
               from: { element: { type: 'repository' } },
-              allow: types(
-                'repository',
-                'adapter',
-                'services',
-                'types',
-                'public-api',
-                'cross-entity-api',
-                'shared-lib',
-                'shared-api',
-                'shared-config',
-              ),
+              allow: toOwnSlice('repository', 'adapter', 'services', 'types'),
+            },
+            { from: { element: { type: 'services' } }, allow: toOwnSlice('services', 'types') },
+            { from: { element: { type: 'adapter' } }, allow: toOwnSlice('types') },
+            { from: { element: { type: 'types' } }, allow: toOwnSlice('types') },
+            toLowerPublicApi('pages'),
+            toLowerPublicApi('widgets'),
+            toLowerPublicApi('features'),
+            {
+              from: { element: { types: { anyOf: segments }, captured: { layer: 'entities' } } },
+              allow: { to: { element: { type: 'cross-entity-api' } } },
             },
             {
-              from: { element: { type: 'services' } },
-              allow: types('services', 'types', 'public-api', 'cross-entity-api', 'shared-lib'),
+              from: { element: { type: 'cross-entity-api' } },
+              allow: {
+                to: {
+                  element: {
+                    types: { anyOf: ['types', 'services'] },
+                    captured: { layer: 'entities', slice: '{{ from.captured.slice }}' },
+                  },
+                },
+              },
             },
             {
-              from: { element: { type: 'adapter' } },
-              allow: types('types', 'cross-entity-api', 'shared-api', 'shared-lib', 'shared-config'),
+              from: { element: { types: { anyOf: segments } } },
+              allow: types('shared-lib', 'shared-config'),
             },
-            { from: { element: { type: 'types' } }, allow: types('types', 'cross-entity-api') },
+            { from: { element: { type: 'ui' } }, allow: types('shared-ui') },
+            { from: { element: { type: 'adapter' } }, allow: types('shared-api') },
             { from: { element: { type: 'shared-ui' } }, allow: types('shared-ui', 'shared-lib') },
             {
               from: { element: { type: 'shared-api' } },
