@@ -42,3 +42,22 @@
 .input::-webkit-search-cancel-button {
   appearance: none;
 }
+
+.shortcut {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  cursor: pointer;
+}
+
+.shortcut[data-hovered] {
+  background: var(--surface-sunken);
+}
+
+.shortcut[data-focus-visible] {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
