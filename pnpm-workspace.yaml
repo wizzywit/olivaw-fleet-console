@@ -7,3 +7,4 @@ saveExact: true
 
 allowBuilds:
   esbuild: false
+  unrs-resolver: false
