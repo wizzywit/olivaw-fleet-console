@@ -1,6 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 import type { Robot } from '@/entities/robot/@x/fleet';
 import { applyRobotPatch } from '../adapter/fleetApiAdapter';
+import { applyFleetPatches } from '../services/fleetPatches';
 import { isNewerPatch, patchesAfter } from '../services/patchSequence';
 import type {
   FleetAggregates,
@@ -90,14 +91,7 @@ export function createFleetLiveStore({ schedule, isHidden, now }: FleetLiveStore
 
       flush() {
         if (get().isPaused || pending.length === 0) return;
-        const robots = new Map(get().robots);
-        for (const patch of pending) {
-          for (const robotPatch of patch.robots) {
-            const next = applyRobotPatch(robots.get(robotPatch.id), robotPatch);
-            if (next !== null) robots.set(next.id, next);
-          }
-          for (const id of patch.removed) robots.delete(id);
-        }
+        const robots = applyFleetPatches(get().robots, pending, applyRobotPatch);
         const last = pending.at(-1);
         pending = [];
         set((state) => ({
