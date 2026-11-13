@@ -54,7 +54,7 @@
   font-weight: 600;
 }
 
-.unseen {
+.unacknowledged {
   padding: 1px 8px;
   border-radius: var(--radius-full);
   background: var(--accent-soft);
@@ -63,7 +63,7 @@
   font-weight: 600;
 }
 
-.seen {
+.acknowledged {
   color: var(--text-muted);
   font-size: 12px;
 }

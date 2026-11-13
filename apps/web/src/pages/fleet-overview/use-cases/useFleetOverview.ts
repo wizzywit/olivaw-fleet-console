@@ -42,7 +42,7 @@ export interface AttentionGroupView {
   priority: AttentionPriority;
   count: number;
   countLabel: string;
-  unseenCount: number;
+  unacknowledgedCount: number;
   robotIds: readonly string[];
   worstHref: string;
   worstLabel: string;
@@ -159,7 +159,7 @@ export function useFleetOverview() {
       priority: group.priority,
       count: group.count,
       countLabel: `${formatCount(group.count)} ${group.count === 1 ? 'robot' : 'robots'}`,
-      unseenCount: group.unseenCount,
+      unacknowledgedCount: group.unacknowledgedCount,
       robotIds: group.robotIds,
       worstHref: `/robots/${encodeURIComponent(group.worstRobotId)}`,
       worstLabel,

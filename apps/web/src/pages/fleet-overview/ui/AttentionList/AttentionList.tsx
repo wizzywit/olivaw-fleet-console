@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import type { AttentionReason } from '@/entities/robot';
-import { MarkSeenButton } from '../MarkSeenButton/MarkSeenButton';
+import { AcknowledgeButton } from '../AcknowledgeButton/AcknowledgeButton';
 import { PriorityTag } from '@/shared/ui';
 import type { AttentionGroupView } from '../../use-cases/useFleetOverview';
 import styles from './AttentionList.module.css';
@@ -65,15 +65,15 @@ export function AttentionList({ groups, total }: { groups: AttentionGroupView[];
                   {copy[group.reason].title} · {group.countLabel}
                 </span>
                 <PriorityTag priority={group.priority} />
-                {group.unseenCount > 0 ? (
-                  <span className={styles.unseen}>{group.unseenCount} unseen</span>
+                {group.unacknowledgedCount > 0 ? (
+                  <span className={styles.unacknowledged}>{group.unacknowledgedCount} unacknowledged</span>
                 ) : (
-                  <span className={styles.seen}>All seen</span>
+                  <span className={styles.acknowledged}>All acknowledged</span>
                 )}
               </div>
               <p className={styles.action}>{copy[group.reason].action}</p>
-              {group.unseenCount > 0 && (
-                <MarkSeenButton
+              {group.unacknowledgedCount > 0 && (
+                <AcknowledgeButton
                   reason={group.reason}
                   groupTitle={copy[group.reason].title}
                   robotIds={group.robotIds}

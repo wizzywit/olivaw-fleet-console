@@ -10,7 +10,7 @@ const group = (count: number): AttentionGroupView[] => [
     priority: 'high',
     count,
     countLabel: `${count} robots`,
-    unseenCount: 0,
+    unacknowledgedCount: 0,
     robotIds: ['DLV-0087'],
     worstHref: '/robots/DLV-0087',
     worstLabel: 'DLV-0087',

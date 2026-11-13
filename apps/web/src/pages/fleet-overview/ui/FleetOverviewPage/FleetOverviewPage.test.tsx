@@ -42,22 +42,22 @@ describe('fleet overview', () => {
     ]);
   });
 
-  it('shows how many robots in a group nobody has seen, and marks them seen for every console', async () => {
+  it('shows how many robots in a group nobody has acknowledged, and acknowledges them for every console', async () => {
     let marked: unknown;
     server.use(
-      http.post('*/api/attention-groups/battery-critical/seen', async ({ request }) => {
+      http.post('*/api/attention-groups/battery-critical/acknowledge', async ({ request }) => {
         marked = await request.json();
         return new HttpResponse(null, { status: 204 });
       }),
     );
     renderWithProviders(<FleetOverviewPage />);
     const attention = await screen.findByRole('region', { name: /Needs your attention/ });
-    expect(within(attention).getByText('1 unseen')).toBeInTheDocument();
-    await userEvent.click(within(attention).getByRole('button', { name: 'Mark Battery critical seen' }));
+    expect(within(attention).getByText('1 unacknowledged')).toBeInTheDocument();
+    await userEvent.click(within(attention).getByRole('button', { name: 'Acknowledge Battery critical' }));
     expect(marked).toEqual({ robotIds: ['DLV-0087'] });
   });
 
-  it('shows a group as all seen once the server reports no unseen robots', async () => {
+  it('shows a group as all acknowledged once the server reports none unacknowledged', async () => {
     server.use(
       ...fleetHandlers(
         aSnapshotDto({
@@ -65,7 +65,7 @@ describe('fleet overview', () => {
             ...aSnapshotDto().aggregates,
             attentionGroups: aSnapshotDto().aggregates.attentionGroups.map((group) => ({
               ...group,
-              unseenCount: 0,
+              unacknowledgedCount: 0,
             })),
           },
         }),
@@ -73,19 +73,19 @@ describe('fleet overview', () => {
     );
     renderWithProviders(<FleetOverviewPage />);
     const attention = await screen.findByRole('region', { name: /Needs your attention/ });
-    expect(await within(attention).findByText('All seen')).toBeInTheDocument();
-    expect(within(attention).queryByRole('button', { name: /seen$/ })).not.toBeInTheDocument();
+    expect(await within(attention).findByText('All acknowledged')).toBeInTheDocument();
+    expect(within(attention).queryByRole('button', { name: /^Acknowledge/ })).not.toBeInTheDocument();
   });
 
-  it('says when a seen mark could not be saved', async () => {
+  it('says when an acknowledgement could not be saved', async () => {
     server.use(
       http.post(
-        '*/api/attention-groups/battery-critical/seen',
+        '*/api/attention-groups/battery-critical/acknowledge',
         () => new HttpResponse(null, { status: 503 }),
       ),
     );
     renderWithProviders(<FleetOverviewPage />);
-    await userEvent.click(await screen.findByRole('button', { name: 'Mark Battery critical seen' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Acknowledge Battery critical' }));
     expect(await screen.findByText('Not saved. Try again.')).toBeInTheDocument();
   });
 
