@@ -33,6 +33,27 @@ describe('createReconnectingSocket', () => {
     socket.close();
   });
 
+  it('treats a silent connection as lost and reconnects', async () => {
+    let connections = 0;
+    const statuses: SocketStatus[] = [];
+    server.use(
+      live.addEventListener('connection', () => {
+        connections += 1;
+      }),
+    );
+    const socket = createReconnectingSocket({
+      url,
+      onOpen: () => undefined,
+      onMessage: () => undefined,
+      onStatus: (status) => statuses.push(status),
+      backoff: () => 10,
+      idleTimeoutMs: 50,
+    });
+    await waitFor(() => connections >= 2);
+    expect(statuses).toContain('reconnecting');
+    socket.close();
+  });
+
   it('reports reconnecting with a delay after the server closes, and retryNow reconnects at once', async () => {
     let connections = 0;
     const statuses: [SocketStatus, number | null][] = [];
